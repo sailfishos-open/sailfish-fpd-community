@@ -1,5 +1,6 @@
 #include "androidfp.h"
 #include "util/property_store.h"
+#include <QDebug>
 
 std::string IntToStringFingerprintError(int error, int vendorCode){
     switch(error) {
@@ -122,5 +123,9 @@ void AndroidFP::enumerate_cb(uint64_t, uint32_t fingerId, uint32_t, uint32_t rem
 
 void AndroidFP::error_cb(uint64_t, UHardwareBiometryFingerprintError error, int32_t vendorCode, void *context)
 {
-
+    qDebug() << "AndroidFP::error_cb:" << error << vendorCode;
+    if (error == 0) {
+        return;
+    }
+    static_cast<AndroidFP*>(context)->failed(QString::fromUtf8(IntToStringFingerprintError(error, vendorCode).data()));
 }
