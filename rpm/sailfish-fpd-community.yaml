@@ -32,6 +32,8 @@ PkgConfigBR:
 Requires:
   - sailfishsilica-qt5 >= 0.10.9 
 
+Provides: sailfish-fpd
+
 # All installed files
 Files:
   - '%{_bindir}'
