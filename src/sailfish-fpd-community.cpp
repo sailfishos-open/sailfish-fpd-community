@@ -14,7 +14,7 @@
 #include <QDebug>
 #include <QDir>
 
-#include "fpdbiometryd.h"
+#include "fpdcommunity.h"
 
 static void daemonize();
 static void signalHandler(int sig);
@@ -32,7 +32,7 @@ int main(int argc, char **argv)
 
     qDebug() << "Starting sailfish-fpd-biometryd daemon";
 
-    FPDBiometryd service;
+    FPDCommunity service;
 
     return app.exec();
 }

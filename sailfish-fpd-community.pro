@@ -20,7 +20,7 @@ LIBS += -lhybris-common
 
 SOURCES += src/sailfish-fpd-community.cpp \
     src/androidfp.cpp \
-    src/fpdbiometryd.cpp \
+    src/fpdcommunity.cpp \
     src/hardware/biometry_fp_api.cpp \
     src/util/property_store.cpp
 
@@ -47,6 +47,6 @@ TRANSLATIONS += translations/sailfish-fpd-community-de.ts
 HEADERS += \
     src/androidfp.h \
     src/biometry.h \
-    src/fpdbiometryd.h \
+    src/fpdcommunity.h \
     src/hardware/android_hw_module.h \
     src/util/property_store.h
