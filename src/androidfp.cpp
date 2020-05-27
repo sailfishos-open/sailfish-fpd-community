@@ -105,9 +105,26 @@ void AndroidFP::enumerate()
     }
 }
 
-void AndroidFP::enrollresult_cb(uint64_t, uint32_t, uint32_t, uint32_t, void *)
+void AndroidFP::enrollresult_cb(uint64_t, uint32_t fingerId, uint32_t, uint32_t remaining, void *context)
 {
+    qDebug() << "AndroidFP::enrollresult_cb:" << fingerId << remaining;
 
+#if 0
+    if (remaining > 0)
+            {
+                if (((androidEnrollOperation*)context)->totalrem == 0)
+                    ((androidEnrollOperation*)context)->totalrem = remaining + 1;
+                float raw_value = 1 - ((float)remaining / ((androidEnrollOperation*)context)->totalrem);
+                ((androidEnrollOperation*)context)->mobserver->on_progress(biometry::Progress{biometry::Percent::from_raw_value(raw_value), biometry::Dictionary{}});
+            } else {
+                ((androidEnrollOperation*)context)->mobserver->on_progress(biometry::Progress{biometry::Percent::from_raw_value(1), biometry::Dictionary{}});
+                UHardwareBiometryRequestStatus ret = u_hardware_biometry_postEnroll(((androidEnrollOperation*)context)->hybris_fp_instance);
+                if (ret == SYS_OK)
+                    ((androidEnrollOperation*)context)->mobserver->on_succeeded(fingerId);
+                else
+                    ((androidEnrollOperation*)context)->mobserver->on_failed(IntToStringRequestStatus(ret));
+            }
+#endif
 }
 
 void AndroidFP::acquired_cb(uint64_t, UHardwareBiometryFingerprintAcquiredInfo, int32_t, void *)
