@@ -26,6 +26,9 @@ signals:
 
 private:
     AndroidFP m_androidFP;
+    bool m_dbusRegistered = false;
+
+    void registerDBus();
 };
 
 #endif // FPDBIOMETRYD_H
