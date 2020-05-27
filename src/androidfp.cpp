@@ -70,6 +70,14 @@ void AndroidFP::enroll(uid_t user_id)
     }
 }
 
+void AndroidFP::remove(uid_t finger)
+{
+    UHardwareBiometryRequestStatus ret = u_hardware_biometry_remove(m_biometry, 0, finger);
+    if (ret != SYS_OK) {
+        failed(QString::fromUtf8(IntToStringRequestStatus(ret).data()));
+    }
+}
+
 void AndroidFP::enrollresult_cb(uint64_t, uint32_t, uint32_t, uint32_t, void *)
 {
 
