@@ -11,6 +11,7 @@ public:
     explicit AndroidFP(QObject *parent = nullptr);
     void enroll(uid_t user_id);
     void remove(uid_t finger);
+    void cancel();
 
 signals:
     void failed(const QString& message);

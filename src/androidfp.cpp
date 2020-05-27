@@ -78,6 +78,11 @@ void AndroidFP::remove(uid_t finger)
     }
 }
 
+void AndroidFP::cancel()
+{
+    u_hardware_biometry_cancel(m_biometry);
+}
+
 void AndroidFP::enrollresult_cb(uint64_t, uint32_t, uint32_t, uint32_t, void *)
 {
 
