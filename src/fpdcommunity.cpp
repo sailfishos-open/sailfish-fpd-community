@@ -14,5 +14,6 @@ void FPDCommunity::Enroll(const QString &finger)
 
 void FPDCommunity::Identify()
 {
-
+    qDebug() << "FPDCommunity::Identify";
+    m_androidFP.authenticate();
 }
