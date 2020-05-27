@@ -9,10 +9,10 @@ class AndroidFP : public QObject
     Q_OBJECT
 public:
     explicit AndroidFP(QObject *parent = nullptr);
+    void enroll(uid_t user_id);
 
 signals:
-
-public slots:
+    void failed(const QString& message);
 
 private:
     UHardwareBiometry m_biometry = nullptr;

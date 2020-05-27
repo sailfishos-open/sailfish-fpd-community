@@ -59,6 +59,15 @@ AndroidFP::AndroidFP(QObject *parent) : QObject(parent), m_biometry(u_hardware_b
     fp_params.removed_cb = removed_cb;
     fp_params.enumerate_cb = enumerate_cb;
     fp_params.context = this;
+    u_hardware_biometry_setNotify(m_biometry, &fp_params);
+}
+
+void AndroidFP::enroll(uid_t user_id)
+{
+    UHardwareBiometryRequestStatus ret = u_hardware_biometry_enroll(m_biometry, 0, 60, user_id);
+    if (ret != SYS_OK) {
+        failed(QString::fromUtf8(IntToStringRequestStatus(ret).data()));
+    }
 }
 
 void AndroidFP::enrollresult_cb(uint64_t, uint32_t, uint32_t, uint32_t, void *)
