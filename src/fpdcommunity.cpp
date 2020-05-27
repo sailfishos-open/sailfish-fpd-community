@@ -8,6 +8,9 @@
 FPDCommunity::FPDCommunity()
 {
     qDebug() << Q_FUNC_INFO;
+    connect(&m_androidFP, &AndroidFP::enrollProgress, this, &FPDCommunity::slot_enrollProgres);
+    connect(&m_androidFP, &AndroidFP::succeeded, this, &FPDCommunity::slot_succeeded);
+
     registerDBus();
 }
 
@@ -50,3 +53,22 @@ void FPDCommunity::Identify()
     qDebug() << Q_FUNC_INFO;
     m_androidFP.authenticate();
 }
+
+void FPDCommunity::Clear()
+{
+    qDebug() << Q_FUNC_INFO;
+    m_androidFP.clear();
+}
+
+void FPDCommunity::slot_enrollProgres(float pc)
+{
+    qDebug() << Q_FUNC_INFO << pc;
+    emit EnrollProgressChanged(pc * 100);
+}
+
+void FPDCommunity::slot_succeeded(int finger)
+{
+    qDebug() << Q_FUNC_INFO << finger;
+    emit Added(QString::number(finger));
+}
+
