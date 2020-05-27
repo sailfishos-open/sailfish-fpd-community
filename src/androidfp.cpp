@@ -99,7 +99,7 @@ void AndroidFP::authenticate()
 void AndroidFP::enumerate()
 {
     qDebug() << "AndroidFP::enumerate";
-    UHardwareBiometryRequestStatus ret = u_hardware_biometry_enumerate(hybris_fp_instance);
+    UHardwareBiometryRequestStatus ret = u_hardware_biometry_enumerate(m_biometry);
     if (ret != SYS_OK) {
         failed(QString::fromUtf8(IntToStringRequestStatus(ret).data()));
     }
