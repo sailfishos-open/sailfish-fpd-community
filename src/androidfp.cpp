@@ -96,6 +96,15 @@ void AndroidFP::authenticate()
     }
 }
 
+void AndroidFP::enumerate()
+{
+    qDebug() << "AndroidFP::enumerate";
+    UHardwareBiometryRequestStatus ret = u_hardware_biometry_enumerate(hybris_fp_instance);
+    if (ret != SYS_OK) {
+        failed(QString::fromUtf8(IntToStringRequestStatus(ret).data()));
+    }
+}
+
 void AndroidFP::enrollresult_cb(uint64_t, uint32_t, uint32_t, uint32_t, void *)
 {
 
@@ -124,7 +133,25 @@ void AndroidFP::removed_cb(uint64_t, uint32_t, uint32_t, uint32_t, void *)
 
 void AndroidFP::enumerate_cb(uint64_t, uint32_t fingerId, uint32_t, uint32_t remaining, void *context)
 {
+    qDebug() << "AndroidFP::enumerate_cb:" << fingerId << remaining;
 
+#if 0
+    if (((androidListOperation*)context)->totalrem == 0)
+        ((androidListOperation*)context)->result.clear();
+    if (remaining > 0)
+    {
+        if (((androidListOperation*)context)->totalrem == 0)
+            ((androidListOperation*)context)->totalrem = remaining + 1;
+        float raw_value = 1 - ((float)remaining / ((androidListOperation*)context)->totalrem);
+        ((androidListOperation*)context)->mobserver->on_progress(biometry::Progress{biometry::Percent::from_raw_value(raw_value), biometry::Dictionary{}});
+        ((androidListOperation*)context)->result.push_back(fingerId);
+    } else {
+        if (fingerId != 0)
+            ((androidListOperation*)context)->result.push_back(fingerId);
+        ((androidListOperation*)context)->mobserver->on_progress(biometry::Progress{biometry::Percent::from_raw_value(1), biometry::Dictionary{}});
+        ((androidListOperation*)context)->mobserver->on_succeeded(((androidListOperation*)context)->result);
+    }
+#endif
 }
 
 void AndroidFP::error_cb(uint64_t, UHardwareBiometryFingerprintError error, int32_t vendorCode, void *context)

@@ -13,6 +13,7 @@ public:
     void remove(uid_t finger);
     void cancel();
     void authenticate();
+    void enumerate();
 
 signals:
     void failed(const QString& message);
