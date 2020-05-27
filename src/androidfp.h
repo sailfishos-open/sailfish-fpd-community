@@ -12,9 +12,11 @@ public:
     void enroll(uid_t user_id);
     void remove(uid_t finger);
     void cancel();
+    void authenticate();
 
 signals:
     void failed(const QString& message);
+    void authenticated(uint32_t fingerId);
 
 private:
     UHardwareBiometry m_biometry = nullptr;
