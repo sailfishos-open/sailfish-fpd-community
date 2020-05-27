@@ -65,7 +65,7 @@ AndroidFP::AndroidFP(QObject *parent) : QObject(parent), m_biometry(u_hardware_b
 
 void AndroidFP::enroll(uid_t user_id)
 {
-    qDebug() << "AndroidFP::enroll:" << user_id;
+    qDebug() << Q_FUNC_INFO << user_id;
     UHardwareBiometryRequestStatus ret = u_hardware_biometry_enroll(m_biometry, 0, 60, user_id);
     if (ret != SYS_OK) {
         failed(QString::fromUtf8(IntToStringRequestStatus(ret).data()));
@@ -74,7 +74,7 @@ void AndroidFP::enroll(uid_t user_id)
 
 void AndroidFP::remove(uid_t finger)
 {
-    qDebug() << "AndroidFP::remove:" << finger;
+    qDebug() << Q_FUNC_INFO << finger;
     UHardwareBiometryRequestStatus ret = u_hardware_biometry_remove(m_biometry, 0, finger);
     if (ret != SYS_OK) {
         failed(QString::fromUtf8(IntToStringRequestStatus(ret).data()));
@@ -89,7 +89,7 @@ void AndroidFP::cancel()
 
 void AndroidFP::authenticate()
 {
-    qDebug() << "AndroidFP::authenticate";
+    qDebug() << Q_FUNC_INFO;
     UHardwareBiometryRequestStatus ret = u_hardware_biometry_authenticate(m_biometry, 0, 0);
     if (ret != SYS_OK) {
         failed(QString::fromUtf8(IntToStringRequestStatus(ret).data()));
@@ -98,7 +98,7 @@ void AndroidFP::authenticate()
 
 void AndroidFP::enumerate()
 {
-    qDebug() << "AndroidFP::enumerate";
+    qDebug() << Q_FUNC_INFO;
     UHardwareBiometryRequestStatus ret = u_hardware_biometry_enumerate(m_biometry);
     if (ret != SYS_OK) {
         failed(QString::fromUtf8(IntToStringRequestStatus(ret).data()));
@@ -107,7 +107,7 @@ void AndroidFP::enumerate()
 
 void AndroidFP::enrollresult_cb(uint64_t, uint32_t fingerId, uint32_t, uint32_t remaining, void *context)
 {
-    qDebug() << "AndroidFP::enrollresult_cb:" << fingerId << remaining;
+    qDebug() << Q_FUNC_INFO << fingerId << remaining;
 
 #if 0
     if (remaining > 0)
@@ -129,12 +129,12 @@ void AndroidFP::enrollresult_cb(uint64_t, uint32_t fingerId, uint32_t, uint32_t 
 
 void AndroidFP::acquired_cb(uint64_t, UHardwareBiometryFingerprintAcquiredInfo, int32_t, void *)
 {
-
+    qDebug() << Q_FUNC_INFO;
 }
 
 void AndroidFP::authenticated_cb(uint64_t, uint32_t fingerId, uint32_t, void *context)
 {
-    qDebug() << "AndroidFP::authenticated_cb:" << fingerId;
+    qDebug() << Q_FUNC_INFO << fingerId;
 
     if (fingerId != 0)
         static_cast<AndroidFP*>(context)->authenticated(fingerId);
@@ -145,7 +145,7 @@ void AndroidFP::authenticated_cb(uint64_t, uint32_t fingerId, uint32_t, void *co
 
 void AndroidFP::removed_cb(uint64_t, uint32_t fingerId, uint32_t, uint32_t remaining, void *context)
 {
-    qDebug() << "AndroidFP::removed_cb:" << fingerId << remaining;
+    qDebug() << Q_FUNC_INFO << fingerId << remaining;
 
 //Needs to handle remove and clear oeprations
 #if 0
@@ -156,7 +156,7 @@ void AndroidFP::removed_cb(uint64_t, uint32_t fingerId, uint32_t, uint32_t remai
 
 void AndroidFP::enumerate_cb(uint64_t, uint32_t fingerId, uint32_t, uint32_t remaining, void *context)
 {
-    qDebug() << "AndroidFP::enumerate_cb:" << fingerId << remaining;
+    qDebug() << Q_FUNC_INFO << fingerId << remaining;
 
 #if 0
     if (((androidListOperation*)context)->totalrem == 0)
@@ -179,7 +179,7 @@ void AndroidFP::enumerate_cb(uint64_t, uint32_t fingerId, uint32_t, uint32_t rem
 
 void AndroidFP::error_cb(uint64_t, UHardwareBiometryFingerprintError error, int32_t vendorCode, void *context)
 {
-    qDebug() << "AndroidFP::error_cb:" << error << vendorCode;
+    qDebug() << Q_FUNC_INFO << error << vendorCode;
     if (error == 0) {
         return;
     }

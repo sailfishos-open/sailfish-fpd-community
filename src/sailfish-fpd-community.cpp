@@ -30,7 +30,7 @@ int main(int argc, char **argv)
     setlinebuf(stdout);
     setlinebuf(stderr);
 
-    qDebug() << "Starting sailfish-fpd-biometryd daemon";
+    qDebug() << "Starting sailfish-fpd-community daemon";
 
     FPDCommunity service;
 
