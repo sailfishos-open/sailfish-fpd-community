@@ -126,9 +126,15 @@ void AndroidFP::authenticated_cb(uint64_t, uint32_t fingerId, uint32_t, void *co
     }
 }
 
-void AndroidFP::removed_cb(uint64_t, uint32_t, uint32_t, uint32_t, void *)
+void AndroidFP::removed_cb(uint64_t, uint32_t fingerId, uint32_t, uint32_t remaining, void *context)
 {
+    qDebug() << "AndroidFP::removed_cb:" << fingerId << remaining;
 
+//Needs to handle remove and clear oeprations
+#if 0
+    if (fingerId == ((androidRemovalOperation*)context)->finger && remaining == 0)
+        ((androidRemovalOperation*)context)->mobserver->on_succeeded(fingerId);
+#endif
 }
 
 void AndroidFP::enumerate_cb(uint64_t, uint32_t fingerId, uint32_t, uint32_t remaining, void *context)
