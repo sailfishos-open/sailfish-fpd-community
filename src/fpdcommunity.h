@@ -52,6 +52,7 @@ public:
     Q_INVOKABLE void Identify();
     Q_INVOKABLE void Clear();
     Q_INVOKABLE QString GetState();
+    Q_INVOKABLE QStringList GetAll();
 
 signals:
     void StateChanged(const QString &state);

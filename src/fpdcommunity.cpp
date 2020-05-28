@@ -55,6 +55,7 @@ void FPDCommunity::Enroll(const QString &finger)
     if (m_state == FPSTATE_IDLE) {
         setState(FPSTATE_ENROLLING);
         m_androidFP.enroll(100000); //nemo userID
+        emit EnrollProgressChanged(0);
     }
 }
 
@@ -81,6 +82,12 @@ void FPDCommunity::Clear()
 QString FPDCommunity::GetState()
 {
     return QtEnumToString(m_state);
+}
+
+//!TODO Not sure what this returns
+QStringList FPDCommunity::GetAll()
+{
+    return QStringList();
 }
 
 void FPDCommunity::slot_enrollProgress(float pc)
