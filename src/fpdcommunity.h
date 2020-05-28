@@ -62,7 +62,7 @@ signals:
 private slots:
     void slot_enrollProgress(float pc);
     void slot_succeeded(int finger);
-    void slot_acquired(UHardwareBiometryFingerprintAcquiredInfo info); //Convert the android Acquired State to SFOS state
+    void slot_acquired(int info); //Convert the android Acquired State to SFOS state
     void slot_removed(int finger);
 
 private:

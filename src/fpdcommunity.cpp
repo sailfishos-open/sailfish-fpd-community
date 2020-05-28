@@ -8,6 +8,7 @@
 FPDCommunity::FPDCommunity()
 {
     qDebug() << Q_FUNC_INFO;
+
     connect(&m_androidFP, &AndroidFP::enrollProgress, this, &FPDCommunity::slot_enrollProgress);
     connect(&m_androidFP, &AndroidFP::succeeded, this, &FPDCommunity::slot_succeeded);
     connect(&m_androidFP, &AndroidFP::removed, this, &FPDCommunity::slot_removed);
@@ -83,7 +84,7 @@ void FPDCommunity::slot_succeeded(int finger)
     emit Added(QString::number(finger));
 }
 
-void FPDCommunity::slot_acquired(UHardwareBiometryFingerprintAcquiredInfo info)
+void FPDCommunity::slot_acquired(int info)
 {
     qDebug() << Q_FUNC_INFO << info;
     AcquiredState newState;

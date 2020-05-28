@@ -18,6 +18,7 @@ public:
 
     Q_SLOT void enrollCallback(uint32_t finger, uint32_t remaining);
     Q_SLOT void removeCallback(uint32_t finger, uint32_t remaining);
+    Q_SLOT void acquiredCallback(UHardwareBiometryFingerprintAcquiredInfo info);
 
 signals:
     void failed(const QString& message);
@@ -25,7 +26,7 @@ signals:
     void removed(int finger); //0 for clear
     void authenticated(uint32_t fingerId);
     void enrollProgress(float progress); //Progress is 0..1
-    void acquired(UHardwareBiometryFingerprintAcquiredInfo info);
+    void acquired(int info);
 
 private:
     UHardwareBiometry m_biometry = nullptr;

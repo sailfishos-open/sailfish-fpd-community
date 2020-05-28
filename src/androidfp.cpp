@@ -147,17 +147,22 @@ void AndroidFP::removeCallback(uint32_t finger, uint32_t remaining)
     }
 }
 
+void AndroidFP::acquiredCallback(UHardwareBiometryFingerprintAcquiredInfo info)
+{
+    qDebug() << Q_FUNC_INFO << info;
+    emit acquired(info);
+}
+
 void AndroidFP::enrollresult_cb(uint64_t, uint32_t fingerId, uint32_t, uint32_t remaining, void *context)
 {
     qDebug() << Q_FUNC_INFO << fingerId << remaining;
-
     static_cast<AndroidFP*>(context)->enrollCallback(fingerId, remaining);
 }
 
 void AndroidFP::acquired_cb(uint64_t, UHardwareBiometryFingerprintAcquiredInfo info, int32_t, void *context)
 {
     qDebug() << Q_FUNC_INFO << info;
-    static_cast<AndroidFP*>(context)->acquired(info);
+    static_cast<AndroidFP*>(context)->acquiredCallback(info);
 }
 
 void AndroidFP::authenticated_cb(uint64_t, uint32_t fingerId, uint32_t, void *context)
