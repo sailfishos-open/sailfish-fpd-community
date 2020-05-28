@@ -2,14 +2,49 @@
 #define FPDBIOMETRYD_H
 
 #include <QObject>
+#include <QMetaEnum>
 #include "androidfp.h"
 
 #define SERVICE_NAME "org.sailfishos.fingerprint1"
+
+template<typename QEnum>
+std::string QtEnumToString (const QEnum value)
+{
+  return std::string(QMetaEnum::fromType<QEnum>().valueToKey(value));
+}
 
 class FPDCommunity : public QObject
 {
     Q_OBJECT
     Q_CLASSINFO("D-Bus Interface", SERVICE_NAME)
+
+    enum State {
+        FPSTATE_UNKNOWN,
+        FPSTATE_UNSET,
+        FPSTATE_IDLE,
+        FPSTATE_ENROLLING,
+        FPSTATE_IDENTIFYING,
+        FPSTATE_ENUMERATING,
+        FPSTATE_REMOVING,
+        FPSTATE_VERIFYING,
+        FPSTATE_ABORTING,
+        FPSTATE_TERMINATING
+    };
+    Q_ENUM(State)
+
+    enum Acquired {
+        FPACQUIRED_UNKNOWN,
+        FPACQUIRED_GOOD,
+        FPACQUIRED_PARTIAL,
+        FPACQUIRED_INSUFFICIENT,
+        FPACQUIRED_IMAGER_DIRTY,
+        FPACQUIRED_TOO_SLOW,
+        FPACQUIRED_TOO_FAST,
+        FPACQUIRED_UNSET,
+        FPACQUIRED_UNSPECIFIED,
+        FPACQUIRED_UNRECOGNIZED,
+    };
+    Q_ENUM(Acquired)
 
 public:
     FPDCommunity();
