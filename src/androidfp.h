@@ -22,9 +22,9 @@ public:
 
 signals:
     void failed(const QString& message);
-    void succeeded(int fingerId);
+    void succeeded(int fingerId); //After enrollment
     void removed(int finger); //0 for clear
-    void authenticated(uint32_t fingerId);
+    void authenticated(int fingerId);
     void enrollProgress(float progress); //Progress is 0..1
     void acquired(int info);
 

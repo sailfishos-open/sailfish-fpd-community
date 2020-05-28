@@ -4,6 +4,7 @@
 #include <QDBusError>
 #include <QDBusInterface>
 #include <QCoreApplication>
+#include <QTimer>
 
 FPDCommunity::FPDCommunity()
 {
@@ -11,8 +12,10 @@ FPDCommunity::FPDCommunity()
 
     connect(&m_androidFP, &AndroidFP::enrollProgress, this, &FPDCommunity::slot_enrollProgress);
     connect(&m_androidFP, &AndroidFP::succeeded, this, &FPDCommunity::slot_succeeded);
+    connect(&m_androidFP, &AndroidFP::failed, this, &FPDCommunity::slot_failed);
     connect(&m_androidFP, &AndroidFP::removed, this, &FPDCommunity::slot_removed);
     connect(&m_androidFP, &AndroidFP::acquired, this, &FPDCommunity::slot_acquired);
+    connect(&m_androidFP, &AndroidFP::authenticated, this, &FPDCommunity::slot_authenticated);
 
     registerDBus();
 }
@@ -58,7 +61,11 @@ void FPDCommunity::Enroll(const QString &finger)
 void FPDCommunity::Identify()
 {
     qDebug() << Q_FUNC_INFO;
-    m_androidFP.authenticate();
+    if (m_state == FPSTATE_IDLE) {
+        setState(FPSTATE_IDENTIFYING);
+        QTimer::singleShot(30000, this, &FPDCommunity::slot_cancelIdentify);
+        m_androidFP.authenticate();
+    }
 }
 
 void FPDCommunity::Clear()
@@ -82,6 +89,14 @@ void FPDCommunity::slot_succeeded(int finger)
     qDebug() << Q_FUNC_INFO << finger;
     setState(FPSTATE_IDLE);
     emit Added(QString::number(finger));
+}
+
+void FPDCommunity::slot_failed(const QString &message)
+{
+    qDebug() << Q_FUNC_INFO << message;
+    if (!(m_state == FPSTATE_IDENTIFYING && message == "FINGER_NOT_RECOGNIZED")) {
+        setState(FPSTATE_IDLE);
+    }
 }
 
 void FPDCommunity::slot_acquired(int info)
@@ -126,6 +141,20 @@ void FPDCommunity::slot_removed(int finger)
 {
     qDebug() << Q_FUNC_INFO << finger;
     setState(FPSTATE_IDLE);
+}
+
+void FPDCommunity::slot_authenticated(int finger)
+{
+    qDebug() << Q_FUNC_INFO << finger;
+    setState(FPSTATE_IDLE);
+    emit Identified(QString::number(finger));
+}
+
+void FPDCommunity::slot_cancelIdentify()
+{
+    qDebug() << Q_FUNC_INFO;
+    setState(FPSTATE_IDLE);
+    m_androidFP.cancel();
 }
 
 void FPDCommunity::setState(FPDCommunity::State newState)

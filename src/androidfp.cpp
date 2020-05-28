@@ -84,7 +84,7 @@ void AndroidFP::remove(uid_t finger)
 
 void AndroidFP::cancel()
 {
-    qDebug() << "AndroidFP::cancel";
+    qDebug() << Q_FUNC_INFO;
     u_hardware_biometry_cancel(m_biometry);
 }
 
