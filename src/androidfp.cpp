@@ -109,6 +109,7 @@ void AndroidFP::enumerate()
 void AndroidFP::clear()
 {
     qDebug() << Q_FUNC_INFO;
+    m_removingFinger = 0;
     UHardwareBiometryRequestStatus ret = u_hardware_biometry_remove(m_biometry, 0, 0);
     if (ret != SYS_OK) {
         failed(QString::fromUtf8(IntToStringRequestStatus(ret).data()));
@@ -140,7 +141,7 @@ void AndroidFP::removeCallback(uint32_t finger, uint32_t remaining)
 {
     qDebug() << Q_FUNC_INFO << finger << remaining;
 
-    if (finger == m_removingFinger && remaining == 0) {
+    if ((finger == m_removingFinger || m_removingFinger == 0) && remaining == 0) {
         emit removed(finger);
         m_removingFinger = 0;
     }
