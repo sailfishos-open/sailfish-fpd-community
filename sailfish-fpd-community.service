@@ -1,0 +1,23 @@
+[Unit]
+Description=Community Fingerprint Daemon
+DefaultDependencies=no
+Requires=dbus.socket
+After=dbus.socket
+After=local-fs.target
+After=droid-hal-init.service
+After=droid-late-start.service
+Conflicts=shutdown.target
+
+[Service]
+Type=dbus
+BusName=org.sailfishos.fingerprint1
+ExecStartPre=/bin/sh -c '/usr/bin/test -f /run/systemd/boot-status/init-done || sleep 5 || :'
+ExecStart=/usr/bin/sailfish-fpd-community
+Restart=always
+CapabilityBoundingSet=CAP_BLOCK_SUSPEND CAP_CHOWN CAP_DAC_OVERRIDE CAP_FOWNER CAP_IPC_LOCK
+PrivateTmp=yes
+ProtectHome=yes
+ProtectSystem=full
+
+[Install]
+WantedBy=multi-user.target

@@ -54,15 +54,11 @@ rm -rf %{buildroot}
 # >> install post
 # << install post
 
-desktop-file-install --delete-original       \
-  --dir %{buildroot}%{_datadir}/applications             \
-   %{buildroot}%{_datadir}/applications/*.desktop
-
 %files
 %defattr(-,root,root,-)
 %{_bindir}
-%{_datadir}/%{name}
-%{_datadir}/applications/%{name}.desktop
-%{_datadir}/icons/hicolor/*/apps/%{name}.png
+%{_sysconfdir}/dbus-1/system.d/org.sailfishos.fingerprint1.conf
+/lib/systemd/system/sailfish-fpd-community.service
+
 # >> files
 # << files
