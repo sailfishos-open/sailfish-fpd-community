@@ -35,7 +35,7 @@ void FPDCommunity::registerDBus()
             return;
         }
 
-        if (!connection.registerObject("/", this, QDBusConnection::ExportAllInvokables | QDBusConnection::ExportAllSignals | QDBusConnection::ExportAllProperties))
+        if (!connection.registerObject("/org/sailfishos/fingerprint1", this, QDBusConnection::ExportAllInvokables | QDBusConnection::ExportAllSignals | QDBusConnection::ExportAllProperties))
         {
             qDebug() << "Didnt register object"
                         "";
