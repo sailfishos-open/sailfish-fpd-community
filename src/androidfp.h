@@ -22,7 +22,8 @@ signals:
     void failed(const QString& message);
     void succeeded(int fingerId);
     void authenticated(uint32_t fingerId);
-    void enrollProgress(float progress);
+    void enrollProgress(float progress); //Progress is 0..1
+    void acquired(UHardwareBiometryFingerprintAcquiredInfo info);
 
 private:
     UHardwareBiometry m_biometry = nullptr;

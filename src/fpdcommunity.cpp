@@ -72,3 +72,40 @@ void FPDCommunity::slot_succeeded(int finger)
     emit Added(QString::number(finger));
 }
 
+void FPDCommunity::slot_acquired(UHardwareBiometryFingerprintAcquiredInfo info)
+{
+    AcquiredState newState;
+
+    switch(info) {
+    case ACQUIRED_GOOD:
+        newState = FPACQUIRED_GOOD;
+        break;
+    case ACQUIRED_PARTIAL:
+        newState = FPACQUIRED_PARTIAL;
+        break;
+    case ACQUIRED_INSUFFICIENT:
+        newState = FPACQUIRED_INSUFFICIENT;
+        break;
+    case ACQUIRED_IMAGER_DIRTY:
+        newState = FPACQUIRED_IMAGER_DIRTY;
+        break;
+    case ACQUIRED_TOO_SLOW:
+        newState = FPACQUIRED_TOO_SLOW;
+        break;
+    case ACQUIRED_TOO_FAST:
+        newState = FPACQUIRED_TOO_FAST;
+        break;
+    case ACQUIRED_VENDOR:
+        newState = FPACQUIRED_UNRECOGNIZED;
+        break;
+    default:
+        newState = FPACQUIRED_GOOD; //Should we default to good?
+        break;
+    }
+
+    if (newState != m_acquired) {
+        m_acquired = newState;
+        emit AcquisitionInfo(QtEnumToString(m_acquired));
+    }
+}
+

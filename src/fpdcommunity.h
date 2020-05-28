@@ -8,9 +8,9 @@
 #define SERVICE_NAME "org.sailfishos.fingerprint1"
 
 template<typename QEnum>
-std::string QtEnumToString (const QEnum value)
+QString QtEnumToString (const QEnum value)
 {
-  return std::string(QMetaEnum::fromType<QEnum>().valueToKey(value));
+  return QMetaEnum::fromType<QEnum>().valueToKey(value);
 }
 
 class FPDCommunity : public QObject
@@ -18,6 +18,7 @@ class FPDCommunity : public QObject
     Q_OBJECT
     Q_CLASSINFO("D-Bus Interface", SERVICE_NAME)
 
+public:
     enum State {
         FPSTATE_UNKNOWN,
         FPSTATE_UNSET,
@@ -32,7 +33,7 @@ class FPDCommunity : public QObject
     };
     Q_ENUM(State)
 
-    enum Acquired {
+    enum AcquiredState {
         FPACQUIRED_UNKNOWN,
         FPACQUIRED_GOOD,
         FPACQUIRED_PARTIAL,
@@ -44,9 +45,8 @@ class FPDCommunity : public QObject
         FPACQUIRED_UNSPECIFIED,
         FPACQUIRED_UNRECOGNIZED,
     };
-    Q_ENUM(Acquired)
+    Q_ENUM(AcquiredState)
 
-public:
     FPDCommunity();
     Q_INVOKABLE void Enroll(const QString &finger);
     Q_INVOKABLE void Identify();
@@ -62,10 +62,13 @@ signals:
 private slots:
     void slot_enrollProgres(float pc);
     void slot_succeeded(int finger);
+    void slot_acquired(UHardwareBiometryFingerprintAcquiredInfo info); //Convert the android Acquired State to SFOS state
 
 private:
     AndroidFP m_androidFP;
     bool m_dbusRegistered = false;
+    State m_state = FPSTATE_IDLE;
+    AcquiredState m_acquired = FPACQUIRED_UNSPECIFIED;
 
     void registerDBus();
 };
