@@ -48,20 +48,33 @@ public:
     Q_ENUM(AcquiredState)
 
     FPDCommunity();
+
+    /* ========================================================================= *
+     * FINGERPRINT_DAEMON_DBUS_SERVICE (API Version 1)
+     * ========================================================================= */
     Q_INVOKABLE void Enroll(const QString &finger);
     Q_INVOKABLE void Identify();
-    Q_INVOKABLE void Clear();
     Q_INVOKABLE QString GetState();
     Q_INVOKABLE QStringList GetAll(); //Returns list of templates in store
     Q_INVOKABLE void Abort();
+    Q_INVOKABLE void Verify();
+    Q_INVOKABLE void Remove();
 
-signals:
-    void StateChanged(const QString &state);
-    void EnrollProgressChanged(int progress);
-    void AcquisitionInfo(const QString &info);
-    void Added(const QString &finger);
-    void Identified(const QString &finger);
+    Q_SIGNAL void Added(const QString &finger);
+    Q_SIGNAL void Removed(const QString &finger);
+    Q_SIGNAL void Identified(const QString &finger);
+    Q_SIGNAL void Aborted();
+    Q_SIGNAL void Failed();
+    Q_SIGNAL void Verified();
 
+    Q_SIGNAL void StateChanged(const QString &state);
+    Q_SIGNAL void EnrollProgressChanged(int progress);
+    Q_SIGNAL void AcquisitionInfo(const QString &info);
+    Q_SIGNAL void ErrorInfo(const QString &error);
+
+    /* ========================================================================= */
+
+    Q_INVOKABLE void Clear();
 private slots:
     void slot_enrollProgress(float pc);
     void slot_succeeded(int finger);

@@ -99,6 +99,16 @@ void FPDCommunity::Abort()
     setState(FPSTATE_IDLE);
 }
 
+void FPDCommunity::Verify()
+{
+
+}
+
+void FPDCommunity::Remove()
+{
+
+}
+
 void FPDCommunity::slot_enrollProgress(float pc)
 {
     qDebug() << Q_FUNC_INFO << pc;
