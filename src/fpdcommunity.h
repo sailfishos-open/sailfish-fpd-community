@@ -52,7 +52,8 @@ public:
     Q_INVOKABLE void Identify();
     Q_INVOKABLE void Clear();
     Q_INVOKABLE QString GetState();
-    Q_INVOKABLE QStringList GetAll();
+    Q_INVOKABLE QStringList GetAll(); //Returns list of templates in store
+    Q_INVOKABLE void Abort();
 
 signals:
     void StateChanged(const QString &state);

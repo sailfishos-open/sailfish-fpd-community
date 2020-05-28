@@ -81,13 +81,22 @@ void FPDCommunity::Clear()
 
 QString FPDCommunity::GetState()
 {
+    qDebug() << Q_FUNC_INFO;
     return QtEnumToString(m_state);
 }
 
 //!TODO Not sure what this returns
 QStringList FPDCommunity::GetAll()
 {
+    qDebug() << Q_FUNC_INFO;
     return QStringList();
+}
+
+void FPDCommunity::Abort()
+{
+    qDebug() << Q_FUNC_INFO;
+    m_androidFP.cancel();
+    setState(FPSTATE_IDLE);
 }
 
 void FPDCommunity::slot_enrollProgress(float pc)
