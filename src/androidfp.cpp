@@ -136,6 +136,16 @@ void AndroidFP::enrollCallback(uint32_t finger, uint32_t remaining)
     }
 }
 
+void AndroidFP::removeCallback(uint32_t finger, uint32_t remaining)
+{
+    qDebug() << Q_FUNC_INFO << finger << remaining;
+
+    if (finger == m_removingFinger && remaining == 0) {
+        emit removed(finger);
+        m_removingFinger = 0;
+    }
+}
+
 void AndroidFP::enrollresult_cb(uint64_t, uint32_t fingerId, uint32_t, uint32_t remaining, void *context)
 {
     qDebug() << Q_FUNC_INFO << fingerId << remaining;
@@ -164,11 +174,7 @@ void AndroidFP::removed_cb(uint64_t, uint32_t fingerId, uint32_t, uint32_t remai
 {
     qDebug() << Q_FUNC_INFO << fingerId << remaining;
 
-//Needs to handle remove and clear oeprations
-#if 0
-    if (fingerId == ((androidRemovalOperation*)context)->finger && remaining == 0)
-        ((androidRemovalOperation*)context)->mobserver->on_succeeded(fingerId);
-#endif
+    static_cast<AndroidFP*>(context)->removeCallback(fingerId, remaining);
 }
 
 void AndroidFP::enumerate_cb(uint64_t, uint32_t fingerId, uint32_t, uint32_t remaining, void *context)

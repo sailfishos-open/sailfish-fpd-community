@@ -60,9 +60,10 @@ signals:
     void Identified(const QString &finger);
 
 private slots:
-    void slot_enrollProgres(float pc);
+    void slot_enrollProgress(float pc);
     void slot_succeeded(int finger);
     void slot_acquired(UHardwareBiometryFingerprintAcquiredInfo info); //Convert the android Acquired State to SFOS state
+    void slot_removed(int finger);
 
 private:
     AndroidFP m_androidFP;
@@ -70,6 +71,7 @@ private:
     State m_state = FPSTATE_IDLE;
     AcquiredState m_acquired = FPACQUIRED_UNSPECIFIED;
 
+    void setState(State newState);
     void registerDBus();
 };
 

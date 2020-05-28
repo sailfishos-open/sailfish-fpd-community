@@ -16,11 +16,13 @@ public:
     void enumerate();
     void clear();
 
-    void enrollCallback(uint32_t finger, uint32_t remaining);
+    Q_SLOT void enrollCallback(uint32_t finger, uint32_t remaining);
+    Q_SLOT void removeCallback(uint32_t finger, uint32_t remaining);
 
 signals:
     void failed(const QString& message);
     void succeeded(int fingerId);
+    void removed(int finger); //0 for clear
     void authenticated(uint32_t fingerId);
     void enrollProgress(float progress); //Progress is 0..1
     void acquired(UHardwareBiometryFingerprintAcquiredInfo info);
@@ -37,6 +39,7 @@ private:
     static void error_cb(uint64_t, UHardwareBiometryFingerprintError error, int32_t vendorCode, void *context);
 
     float m_enrollRemaining = 0.0;
+    uint32_t m_removingFinger = 0;
 };
 
 #endif // ANDROIDFP_H
