@@ -37,9 +37,6 @@ Provides: sailfish-fpd
 # All installed files
 Files:
   - '%{_bindir}'
-  - '%{_datadir}/%{name}'
-  - '%{_datadir}/applications/%{name}.desktop'
-  - '%{_datadir}/icons/hicolor/*/apps/%{name}.png'
 
 # For more information about yaml and what's supported in Sailfish OS
 # build system, please see https://wiki.merproject.org/wiki/Spectacle
