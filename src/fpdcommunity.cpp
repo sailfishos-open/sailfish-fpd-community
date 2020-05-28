@@ -1,4 +1,4 @@
-#include "fpdcommunity.h"
+﻿#include "fpdcommunity.h"
 #include <QDebug>
 #include <QDBusConnection>
 #include <QDBusError>
@@ -76,6 +76,11 @@ void FPDCommunity::Clear()
         setState(FPSTATE_REMOVING);
         m_androidFP.clear();
     }
+}
+
+QString FPDCommunity::GetState()
+{
+    return QtEnumToString(m_state);
 }
 
 void FPDCommunity::slot_enrollProgress(float pc)

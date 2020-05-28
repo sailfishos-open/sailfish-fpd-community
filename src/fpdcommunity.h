@@ -51,6 +51,7 @@ public:
     Q_INVOKABLE void Enroll(const QString &finger);
     Q_INVOKABLE void Identify();
     Q_INVOKABLE void Clear();
+    Q_INVOKABLE QString GetState();
 
 signals:
     void StateChanged(const QString &state);
