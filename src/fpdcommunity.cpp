@@ -125,6 +125,7 @@ void FPDCommunity::slot_succeeded(int finger)
 void FPDCommunity::slot_failed(const QString &message)
 {
     qDebug() << Q_FUNC_INFO << message;
+
     if (!(m_state == FPSTATE_IDENTIFYING && message == "FINGER_NOT_RECOGNIZED")) {
         setState(FPSTATE_IDLE);
     }

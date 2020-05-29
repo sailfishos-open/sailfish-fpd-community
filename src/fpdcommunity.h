@@ -47,6 +47,50 @@ public:
     };
     Q_ENUM(AcquiredState)
 
+    enum Error {
+        FPERROR_UNKNOWN,
+        FPERROR_NONE,
+        FPERROR_HW_UNAVAILABLE,
+        FPERROR_UNABLE_TO_PROCESS,
+        FPERROR_TIMEOUT,
+        FPERROR_NO_SPACE,
+        FPERROR_ABORTED,
+        FPERROR_UNABLE_TO_REMOVE,
+        FPERROR_UNSPECIFIED
+    };
+    Q_ENUM(Error)
+
+    enum Reply
+    {
+        /** Operation successfully started */
+        FPREPLY_STARTED                  = 0,
+
+        /** Unspecified (low level) failure */
+        FPREPLY_FAILED                   = 1,
+
+        /** Abort() while already idle */
+        FPREPLY_ALREADY_IDLE             = 2,
+
+        /** Abort/Enroll/Identify() while busy */
+        FPREPLY_ALREADY_BUSY             = 3,
+
+        /** Not allowed  */
+        FPREPLY_DENIED                   = 4,
+
+        /** Enroll() key that already exists */
+        FPREPLY_KEY_ALREADY_EXISTS       = 5,
+
+        /** Remove() key that does not exist */
+        FPREPLY_KEY_DOES_NOT_EXIST       = 6,
+
+        /** Identify() without having any keys */
+        FPREPLY_NO_KEYS_AVAILABLE        = 7,
+
+        /** Null or otherwise illegal key name */
+        FPREPLY_KEY_IS_INVALID           = 8,
+    };
+    Q_ENUM(Reply)
+
     FPDCommunity();
 
     /* ========================================================================= *
@@ -75,6 +119,7 @@ public:
     /* ========================================================================= */
 
     Q_INVOKABLE void Clear();
+
 private slots:
     void slot_enrollProgress(float pc);
     void slot_succeeded(int finger);
