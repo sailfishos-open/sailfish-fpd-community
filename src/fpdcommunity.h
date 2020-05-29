@@ -134,6 +134,7 @@ private:
     bool m_dbusRegistered = false;
     State m_state = FPSTATE_IDLE;
     AcquiredState m_acquired = FPACQUIRED_UNSPECIFIED;
+    QString m_addingFinger;
 
     void setState(State newState);
     void registerDBus();

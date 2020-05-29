@@ -54,6 +54,7 @@ int FPDCommunity::Enroll(const QString &finger)
 
     if (m_state == FPSTATE_IDLE) {
         setState(FPSTATE_ENROLLING);
+        m_addingFinger = finger;
         m_androidFP.enroll(100000); //nemo userID
         emit EnrollProgressChanged(0);
         return FPREPLY_STARTED;
@@ -126,8 +127,8 @@ void FPDCommunity::slot_enrollProgress(float pc)
 void FPDCommunity::slot_succeeded(int finger)
 {
     qDebug() << Q_FUNC_INFO << finger;
+    emit Added(m_addingFinger);
     setState(FPSTATE_IDLE);
-    emit Added(QString::number(finger));
 }
 
 void FPDCommunity::slot_failed(const QString &message)
