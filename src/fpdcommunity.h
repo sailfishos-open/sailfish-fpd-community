@@ -96,11 +96,11 @@ public:
     /* ========================================================================= *
      * FINGERPRINT_DAEMON_DBUS_SERVICE (API Version 1)
      * ========================================================================= */
-    Q_INVOKABLE void Enroll(const QString &finger);
-    Q_INVOKABLE void Identify();
+    Q_INVOKABLE int Enroll(const QString &finger);
+    Q_INVOKABLE int Identify();
     Q_INVOKABLE QString GetState();
     Q_INVOKABLE QStringList GetAll(); //Returns list of templates in store
-    Q_INVOKABLE void Abort();
+    Q_INVOKABLE int Abort();
     Q_INVOKABLE void Verify();
     Q_INVOKABLE void Remove();
 

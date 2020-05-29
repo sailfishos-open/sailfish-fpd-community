@@ -48,7 +48,7 @@ void FPDCommunity::registerDBus()
     }
 }
 
-void FPDCommunity::Enroll(const QString &finger)
+int FPDCommunity::Enroll(const QString &finger)
 {
     qDebug() << Q_FUNC_INFO << finger;
 
@@ -56,17 +56,21 @@ void FPDCommunity::Enroll(const QString &finger)
         setState(FPSTATE_ENROLLING);
         m_androidFP.enroll(100000); //nemo userID
         emit EnrollProgressChanged(0);
+        return FPREPLY_STARTED;
     }
+    return FPREPLY_ALREADY_BUSY;
 }
 
-void FPDCommunity::Identify()
+int FPDCommunity::Identify()
 {
     qDebug() << Q_FUNC_INFO;
     if (m_state == FPSTATE_IDLE) {
         setState(FPSTATE_IDENTIFYING);
         QTimer::singleShot(30000, this, &FPDCommunity::slot_cancelIdentify);
         m_androidFP.authenticate();
+        return FPREPLY_STARTED;
     }
+    return FPREPLY_ALREADY_BUSY;
 }
 
 void FPDCommunity::Clear()
@@ -92,11 +96,15 @@ QStringList FPDCommunity::GetAll()
     return QStringList();
 }
 
-void FPDCommunity::Abort()
+int FPDCommunity::Abort()
 {
     qDebug() << Q_FUNC_INFO;
+    if (m_state == FPSTATE_IDLE) {
+        return FPREPLY_ALREADY_IDLE;
+    }
     m_androidFP.cancel();
     setState(FPSTATE_IDLE);
+    return FPREPLY_STARTED;
 }
 
 void FPDCommunity::Verify()
