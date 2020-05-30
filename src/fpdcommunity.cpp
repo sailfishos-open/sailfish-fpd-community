@@ -133,13 +133,18 @@ int FPDCommunity::Enroll(const QString &finger)
 int FPDCommunity::Identify()
 {
     qDebug() << Q_FUNC_INFO;
-    if (m_state == FPSTATE_IDLE) {
-        setState(FPSTATE_IDENTIFYING);
-        QTimer::singleShot(30000, this, &FPDCommunity::slot_cancelIdentify);
-        m_androidFP.authenticate();
-        return FPREPLY_STARTED;
+    if (m_state != FPSTATE_IDLE) {
+        return FPREPLY_ALREADY_BUSY;
     }
-    return FPREPLY_ALREADY_BUSY;
+
+    if (m_fingerMap.size() == 0) {
+        return FPREPLY_NO_KEYS_AVAILABLE;
+    }
+
+    setState(FPSTATE_IDENTIFYING);
+    QTimer::singleShot(30000, this, &FPDCommunity::slot_cancelIdentify);
+    m_androidFP.authenticate();
+    return FPREPLY_STARTED;
 }
 
 void FPDCommunity::Clear()
