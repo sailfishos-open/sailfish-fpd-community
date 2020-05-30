@@ -96,11 +96,11 @@ QString FPDCommunity::GetState()
 QStringList FPDCommunity::GetAll()
 {
     qDebug() << Q_FUNC_INFO;
-    QStringList list;
-    QList<uint32_t> fingers = m_androidFP.fingerprints();
-    for (auto &f: fingers)
-      list << QString::number(f);
-    return list;
+//    QStringList list;
+//    QList<uint32_t> fingers = m_androidFP.fingerprints();
+//    for (auto &f: fingers)
+//      list << QString::number(f);
+    return m_fingerMap.values();
 }
 
 void FPDCommunity::enumerate()
@@ -142,7 +142,9 @@ void FPDCommunity::slot_enrollProgress(float pc)
 void FPDCommunity::slot_succeeded(uint32_t finger)
 {
     qDebug() << Q_FUNC_INFO << finger;
+    m_fingerMap[finger] = m_addingFinger;
     emit Added(m_addingFinger);
+    m_addingFinger = "";
     enumerate();
     setState(FPSTATE_IDLE);
 }

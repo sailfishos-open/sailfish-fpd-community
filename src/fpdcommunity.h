@@ -140,6 +140,7 @@ private:
     State m_state = FPSTATE_IDLE;
     AcquiredState m_acquired = FPACQUIRED_UNSPECIFIED;
     QString m_addingFinger;
+    QMap<uint32_t, QString> m_fingerMap;
 
     void setState(State newState);
     void registerDBus();
