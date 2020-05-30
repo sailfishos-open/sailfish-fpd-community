@@ -190,9 +190,22 @@ void FPDCommunity::Verify()
 
 }
 
-void FPDCommunity::Remove()
+int FPDCommunity::Remove(const QString &finger)
 {
+    qDebug() << Q_FUNC_INFO << finger;
 
+    if (m_state != FPSTATE_IDLE) {
+        return FPREPLY_ALREADY_BUSY;
+    }
+
+    if (!m_fingerMap.values().contains(finger)) {
+        return FPREPLY_KEY_DOES_NOT_EXIST;
+    }
+
+    setState(FPSTATE_REMOVING);
+    uint32_t key = m_fingerMap.keys().at(m_fingerMap.values().indexOf(finger));
+    m_androidFP.remove(key);
+    return FPREPLY_STARTED;
 }
 
 void FPDCommunity::slot_enrollProgress(float pc)
@@ -263,6 +276,9 @@ void FPDCommunity::slot_acquired(int info)
 void FPDCommunity::slot_removed(uint32_t finger)
 {
     qDebug() << Q_FUNC_INFO << finger;
+    QString f = m_fingerMap[finger];
+    emit Removed(f);
+    m_fingerMap.remove(finger);
     enumerate();
     setState(FPSTATE_IDLE);
 }
