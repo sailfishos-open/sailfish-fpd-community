@@ -16,6 +16,7 @@ FPDCommunity::FPDCommunity()
     connect(&m_androidFP, &AndroidFP::removed, this, &FPDCommunity::slot_removed);
     connect(&m_androidFP, &AndroidFP::acquired, this, &FPDCommunity::slot_acquired);
     connect(&m_androidFP, &AndroidFP::authenticated, this, &FPDCommunity::slot_authenticated);
+    connect(&m_androidFP, &AndroidFP::enumerated, this, &FPDCommunity::slot_enumerated);
 
     registerDBus();
 }
@@ -94,7 +95,20 @@ QString FPDCommunity::GetState()
 QStringList FPDCommunity::GetAll()
 {
     qDebug() << Q_FUNC_INFO;
-    return QStringList();
+    QStringList list;
+    QList<uint32_t> fingers = m_androidFP.fingerprints();
+    for (auto &f: fingers)
+      list << QString::number(f);
+    return list;
+}
+
+void FPDCommunity::Enumerate()
+{
+    qDebug() << Q_FUNC_INFO;
+    if (m_state == FPSTATE_IDLE) {
+        setState(FPSTATE_ENUMERATING);
+        m_androidFP.enumerate();
+    }
 }
 
 int FPDCommunity::Abort()
@@ -124,7 +138,7 @@ void FPDCommunity::slot_enrollProgress(float pc)
     emit EnrollProgressChanged(pc * 100);
 }
 
-void FPDCommunity::slot_succeeded(int finger)
+void FPDCommunity::slot_succeeded(uint32_t finger)
 {
     qDebug() << Q_FUNC_INFO << finger;
     emit Added(m_addingFinger);
@@ -178,13 +192,13 @@ void FPDCommunity::slot_acquired(int info)
     }
 }
 
-void FPDCommunity::slot_removed(int finger)
+void FPDCommunity::slot_removed(uint32_t finger)
 {
     qDebug() << Q_FUNC_INFO << finger;
     setState(FPSTATE_IDLE);
 }
 
-void FPDCommunity::slot_authenticated(int finger)
+void FPDCommunity::slot_authenticated(uint32_t finger)
 {
     qDebug() << Q_FUNC_INFO << finger;
     setState(FPSTATE_IDLE);
@@ -196,6 +210,13 @@ void FPDCommunity::slot_cancelIdentify()
     qDebug() << Q_FUNC_INFO;
     setState(FPSTATE_IDLE);
     m_androidFP.cancel();
+}
+
+void FPDCommunity::slot_enumerated()
+{
+    qDebug() << Q_FUNC_INFO;
+    setState(FPSTATE_IDLE);
+    emit Enumerated();
 }
 
 void FPDCommunity::setState(FPDCommunity::State newState)

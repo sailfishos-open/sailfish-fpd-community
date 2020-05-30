@@ -2,6 +2,8 @@
 #define ANDROIDFP_H
 
 #include <QObject>
+#include <QList>
+
 #include "biometry.h"
 
 class AndroidFP : public QObject
@@ -15,22 +17,22 @@ public:
     void authenticate();
     void enumerate();
     void clear();
-
-    Q_SLOT void enrollCallback(uint32_t finger, uint32_t remaining);
-    Q_SLOT void removeCallback(uint32_t finger, uint32_t remaining);
-    Q_SLOT void acquiredCallback(UHardwareBiometryFingerprintAcquiredInfo info);
+    QList<uint32_t> fingerprints() const;
 
 signals:
     void failed(const QString& message);
-    void succeeded(int fingerId); //After enrollment
-    void removed(int finger); //0 for clear
-    void authenticated(int fingerId);
+    void succeeded(uint32_t fingerId); //After enrollment
+    void removed(uint32_t finger); //0 for clear
+    void authenticated(uint32_t fingerId);
     void enrollProgress(float progress); //Progress is 0..1
     void acquired(int info);
+    void enumerated(); // fingerprint list ready
 
 private:
-    UHardwareBiometry m_biometry = nullptr;
-    UHardwareBiometryParams fp_params;
+    void enumerateCallback(uint32_t finger, uint32_t remaining);
+    void enrollCallback(uint32_t finger, uint32_t remaining);
+    void removeCallback(uint32_t finger, uint32_t remaining);
+    void acquiredCallback(UHardwareBiometryFingerprintAcquiredInfo info);
 
     static void enrollresult_cb(uint64_t, uint32_t, uint32_t, uint32_t, void *);
     static void acquired_cb(uint64_t, UHardwareBiometryFingerprintAcquiredInfo, int32_t, void *);
@@ -39,8 +41,13 @@ private:
     static void enumerate_cb(uint64_t, uint32_t fingerId, uint32_t, uint32_t remaining, void *context);
     static void error_cb(uint64_t, UHardwareBiometryFingerprintError error, int32_t vendorCode, void *context);
 
+private:
+    UHardwareBiometry m_biometry = nullptr;
+    UHardwareBiometryParams fp_params;
+
     float m_enrollRemaining = 0.0;
     uint32_t m_removingFinger = 0;
+    QList<uint32_t> m_fingers;
 };
 
 #endif // ANDROIDFP_H

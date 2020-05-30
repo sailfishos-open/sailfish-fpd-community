@@ -32,6 +32,8 @@ int main(int argc, char **argv)
 
     qDebug() << "Starting sailfish-fpd-community daemon";
 
+    qRegisterMetaType<uint32_t>("uint32_t");
+
     FPDCommunity service;
 
     return app.exec();
