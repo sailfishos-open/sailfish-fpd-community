@@ -1,4 +1,4 @@
-﻿#include "fpdcommunity.h"
+#include "fpdcommunity.h"
 #include <QDebug>
 #include <QDBusConnection>
 #include <QDBusError>
@@ -187,8 +187,8 @@ void FPDCommunity::slot_removed(int finger)
 void FPDCommunity::slot_authenticated(int finger)
 {
     qDebug() << Q_FUNC_INFO << finger;
+    emit Identified("finger1"/*QString::number(finger)*/);
     setState(FPSTATE_IDLE);
-    emit Identified(QString::number(finger));
 }
 
 void FPDCommunity::slot_cancelIdentify()
