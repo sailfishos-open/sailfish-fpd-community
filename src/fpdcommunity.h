@@ -103,7 +103,6 @@ public:
     Q_INVOKABLE int Abort();
     Q_INVOKABLE void Verify();
     Q_INVOKABLE void Remove();
-    Q_INVOKABLE void Enumerate(); // update internal list of fingerprints
 
     Q_SIGNAL void Added(const QString &finger);
     Q_SIGNAL void Removed(const QString &finger);
@@ -111,12 +110,12 @@ public:
     Q_SIGNAL void Aborted();
     Q_SIGNAL void Failed();
     Q_SIGNAL void Verified();
-    Q_SIGNAL void Enumerated();
 
     Q_SIGNAL void StateChanged(const QString &state);
     Q_SIGNAL void EnrollProgressChanged(int progress);
     Q_SIGNAL void AcquisitionInfo(const QString &info);
     Q_SIGNAL void ErrorInfo(const QString &error);
+    Q_SIGNAL void ListChanged();
 
     /* ========================================================================= */
 
@@ -131,6 +130,9 @@ private slots:
     void slot_authenticated(uint32_t finger);
     void slot_cancelIdentify();
     void slot_enumerated();
+
+private:
+    void enumerate();
 
 private:
     AndroidFP m_androidFP;
