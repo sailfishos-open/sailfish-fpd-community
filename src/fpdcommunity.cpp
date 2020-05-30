@@ -270,7 +270,12 @@ void FPDCommunity::slot_removed(uint32_t finger)
 void FPDCommunity::slot_authenticated(uint32_t finger)
 {
     qDebug() << Q_FUNC_INFO << finger;
-    emit Identified("finger1"/*QString::number(finger)*/);
+    if (m_fingerMap.contains(finger)){
+        emit Identified(m_fingerMap[finger]);
+    } else {
+        qDebug() << "Authenticated finger was not found in the map.  Assuming name";
+        emit Identified("finger1");
+    }
     setState(FPSTATE_IDLE);
 }
 
