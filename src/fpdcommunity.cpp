@@ -5,6 +5,11 @@
 #include <QDBusInterface>
 #include <QCoreApplication>
 #include <QTimer>
+#include <QDir>
+#include <QDataStream>
+#include <QFile>
+#define FINGERPRINT_PATH "/var/cache/sailfish-fpd-community/"
+#define FINGERPRINT_FILE "fingerprints.db"
 
 FPDCommunity::FPDCommunity()
 {
@@ -18,7 +23,13 @@ FPDCommunity::FPDCommunity()
     connect(&m_androidFP, &AndroidFP::authenticated, this, &FPDCommunity::slot_authenticated);
     connect(&m_androidFP, &AndroidFP::enumerated, this, &FPDCommunity::slot_enumerated);
 
+    //Create folder to store fingerprint names
+    if (!(QDir().mkpath(FINGERPRINT_PATH))) {
+        qDebug() << "Unable to create " << FINGERPRINT_PATH;
+    }
+
     enumerate();
+    loadFingers();
     registerDBus();
 }
 
@@ -48,6 +59,61 @@ void FPDCommunity::registerDBus()
 
         qDebug() << "Sucessfully registered to dbus systemBus";
     }
+}
+
+void FPDCommunity::saveFingers()
+{
+    qDebug() << Q_FUNC_INFO;
+
+    if (m_fingerMap.count() == 0) {
+        qDebug() << "No fingers to save";
+        return;
+    }
+
+    QString filename = FINGERPRINT_PATH FINGERPRINT_FILE;
+    QFile fingerprintFile(filename);
+
+    if (!fingerprintFile.open(QIODevice::WriteOnly)){
+        qDebug() << "Could not write " << filename;
+        return;
+    }
+
+    QDataStream out(&fingerprintFile);
+    out.setVersion(QDataStream::Qt_5_6);
+    out << m_fingerMap;
+}
+
+void FPDCommunity::loadFingers()
+{
+    qDebug() << Q_FUNC_INFO;
+
+    QString filename = FINGERPRINT_PATH FINGERPRINT_FILE;
+    QFile fingerprintFile(filename);
+    QDataStream in(&fingerprintFile);
+    in.setVersion(QDataStream::Qt_5_6);
+
+    if (!fingerprintFile.open(QIODevice::ReadOnly)) {
+        qDebug() << "Could not read the file:" << filename << "Error string:" << fingerprintFile.errorString();
+        return;
+    }
+
+    in >> m_fingerMap;
+
+    QList<uint32_t> enumeratedFingers = m_androidFP.fingerprints();
+
+    //Check each of the loaded prints to ensure it was loaded from the store
+    QList<uint32_t> keys = m_fingerMap.keys();
+    for (int i = 0; i < keys.size(); ++i) {
+        if (!enumeratedFingers.contains(keys[i])) {
+            qDebug() << "Loaded finger " << keys[i] << m_fingerMap.value(keys[i]) << "not found in store, removing";
+            m_fingerMap.remove(keys[i]);
+        }
+    }
+
+    //Save after load incase any were removed.
+    saveFingers();
+
+    qDebug() << "Loaded finger map:" << m_fingerMap;
 }
 
 int FPDCommunity::Enroll(const QString &finger)
@@ -96,10 +162,6 @@ QString FPDCommunity::GetState()
 QStringList FPDCommunity::GetAll()
 {
     qDebug() << Q_FUNC_INFO;
-//    QStringList list;
-//    QList<uint32_t> fingers = m_androidFP.fingerprints();
-//    for (auto &f: fingers)
-//      list << QString::number(f);
     return m_fingerMap.values();
 }
 
@@ -146,6 +208,7 @@ void FPDCommunity::slot_succeeded(uint32_t finger)
     emit Added(m_addingFinger);
     m_addingFinger = "";
     enumerate();
+    saveFingers();
     setState(FPSTATE_IDLE);
 }
 

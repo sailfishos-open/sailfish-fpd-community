@@ -144,6 +144,8 @@ private:
 
     void setState(State newState);
     void registerDBus();
+    void saveFingers();
+    void loadFingers();
 };
 
 #endif // FPDBIOMETRYD_H
