@@ -100,6 +100,7 @@ void AndroidFP::authenticate()
 void AndroidFP::enumerate()
 {
     qDebug() << Q_FUNC_INFO;
+    m_fingers.clear();
     UHardwareBiometryRequestStatus ret = u_hardware_biometry_enumerate(m_biometry);
     if (ret != SYS_OK) {
         failed(QString::fromUtf8(IntToStringRequestStatus(ret).data()));
@@ -114,6 +115,20 @@ void AndroidFP::clear()
     if (ret != SYS_OK) {
         failed(QString::fromUtf8(IntToStringRequestStatus(ret).data()));
     }
+}
+
+QList<uint32_t> AndroidFP::fingerprints() const
+{
+    qDebug() << Q_FUNC_INFO;
+    return m_fingers;
+}
+
+void AndroidFP::enumerateCallback(uint32_t finger, uint32_t remaining)
+{
+    qDebug() << Q_FUNC_INFO << finger << remaining;
+    m_fingers.push_back(finger);
+    if (remaining == 0)
+      emit enumerated();
 }
 
 void AndroidFP::enrollCallback(uint32_t finger, uint32_t remaining)
@@ -187,6 +202,7 @@ void AndroidFP::enumerate_cb(uint64_t, uint32_t fingerId, uint32_t, uint32_t rem
 {
     qDebug() << Q_FUNC_INFO << fingerId << remaining;
 
+    static_cast<AndroidFP*>(context)->enumerateCallback(fingerId, remaining);
 #if 0
     if (((androidListOperation*)context)->totalrem == 0)
         ((androidListOperation*)context)->result.clear();

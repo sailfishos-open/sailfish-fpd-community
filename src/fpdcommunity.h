@@ -115,6 +115,7 @@ public:
     Q_SIGNAL void EnrollProgressChanged(int progress);
     Q_SIGNAL void AcquisitionInfo(const QString &info);
     Q_SIGNAL void ErrorInfo(const QString &error);
+    Q_SIGNAL void ListChanged();
 
     /* ========================================================================= */
 
@@ -122,12 +123,16 @@ public:
 
 private slots:
     void slot_enrollProgress(float pc);
-    void slot_succeeded(int finger);
+    void slot_succeeded(uint32_t finger);
     void slot_failed(const QString &message);
     void slot_acquired(int info); //Convert the android Acquired State to SFOS state
-    void slot_removed(int finger);
-    void slot_authenticated(int finger);
+    void slot_removed(uint32_t finger);
+    void slot_authenticated(uint32_t finger);
     void slot_cancelIdentify();
+    void slot_enumerated();
+
+private:
+    void enumerate();
 
 private:
     AndroidFP m_androidFP;
