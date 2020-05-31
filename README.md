@@ -16,21 +16,21 @@ retains its header information.
 
 In HADK:
 
- git clone https://github.com/piggz/sailfish-fpd-community.git hybris/mw/sailfish-fpd-community
- source build/envsetup.sh
- export USE_CCACHE=1
- lunch aosp_$DEVICE-user (or appropriate name)
- make libbiometry_fp_api_32
- hybris/mw/sailfish-fpd-community/rpm/copy-hal.sh
+    git clone https://github.com/piggz/sailfish-fpd-community.git hybris/mw/sailfish-fpd-community
+    source build/envsetup.sh
+    export USE_CCACHE=1
+    lunch aosp_$DEVICE-user (or appropriate name)
+    make libbiometry_fp_api_32
+    hybris/mw/sailfish-fpd-community/rpm/copy-hal.sh
 
 In SDK:
 
- rpm/dhd/helpers/build_packages.sh --build=hybris/mw/sailfish-fpd-community --spec=rpm/droid-biometry-fp.spec --do-not-install
+    rpm/dhd/helpers/build_packages.sh --build=hybris/mw/sailfish-fpd-community --spec=rpm/droid-biometry-fp.spec --do-not-install
 
 ### Daemon
 
 in SDK
- rpm/dhd/helpers/build_packages.sh --build=hybris/mw/sailfish-fpd-community
+    rpm/dhd/helpers/build_packages.sh --build=hybris/mw/sailfish-fpd-community
 
 ## Testing
 
