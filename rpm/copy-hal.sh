@@ -9,7 +9,6 @@ if [ ! -f ./out/target/product/${OUT_DEVICE}/system/lib/libbiometry_fp_api.so ];
     exit 1
 fi
 
-pkg=droidmedia-"${1:-0.0.0}"
 fold=$(dirname "$0")/../out
 rm -rf $fold
 mkdir $fold
