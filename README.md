@@ -29,7 +29,8 @@ In SDK:
 
 ### Daemon
 
-in SDK
+in SDK:
+
     rpm/dhd/helpers/build_packages.sh --build=hybris/mw/sailfish-fpd-community
 
 ## Testing
