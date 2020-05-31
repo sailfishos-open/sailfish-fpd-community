@@ -193,7 +193,7 @@ int FPDCommunity::Abort()
 
 void FPDCommunity::Verify()
 {
-
+    qDebug() << Q_FUNC_INFO;
 }
 
 int FPDCommunity::Remove(const QString &finger)
