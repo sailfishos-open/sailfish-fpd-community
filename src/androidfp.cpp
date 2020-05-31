@@ -126,9 +126,10 @@ QList<uint32_t> AndroidFP::fingerprints() const
 void AndroidFP::enumerateCallback(uint32_t finger, uint32_t remaining)
 {
     qDebug() << Q_FUNC_INFO << finger << remaining;
-    m_fingers.push_back(finger);
+    if (finger != 0)
+        m_fingers.push_back(finger);
     if (remaining == 0)
-      emit enumerated();
+        emit enumerated();
 }
 
 void AndroidFP::enrollCallback(uint32_t finger, uint32_t remaining)
@@ -203,23 +204,6 @@ void AndroidFP::enumerate_cb(uint64_t, uint32_t fingerId, uint32_t, uint32_t rem
     qDebug() << Q_FUNC_INFO << fingerId << remaining;
 
     static_cast<AndroidFP*>(context)->enumerateCallback(fingerId, remaining);
-#if 0
-    if (((androidListOperation*)context)->totalrem == 0)
-        ((androidListOperation*)context)->result.clear();
-    if (remaining > 0)
-    {
-        if (((androidListOperation*)context)->totalrem == 0)
-            ((androidListOperation*)context)->totalrem = remaining + 1;
-        float raw_value = 1 - ((float)remaining / ((androidListOperation*)context)->totalrem);
-        ((androidListOperation*)context)->mobserver->on_progress(biometry::Progress{biometry::Percent::from_raw_value(raw_value), biometry::Dictionary{}});
-        ((androidListOperation*)context)->result.push_back(fingerId);
-    } else {
-        if (fingerId != 0)
-            ((androidListOperation*)context)->result.push_back(fingerId);
-        ((androidListOperation*)context)->mobserver->on_progress(biometry::Progress{biometry::Percent::from_raw_value(1), biometry::Dictionary{}});
-        ((androidListOperation*)context)->mobserver->on_succeeded(((androidListOperation*)context)->result);
-    }
-#endif
 }
 
 void AndroidFP::error_cb(uint64_t, UHardwareBiometryFingerprintError error, int32_t vendorCode, void *context)
