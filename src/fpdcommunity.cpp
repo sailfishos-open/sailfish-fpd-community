@@ -25,11 +25,11 @@ FPDCommunity::FPDCommunity()
 
     //Create folder to store fingerprint names
     if (!(QDir().mkpath(FINGERPRINT_PATH))) {
-        qDebug() << "Unable to create " << FINGERPRINT_PATH;
+        qWarning() << "Unable to create " << FINGERPRINT_PATH;
     }
 
+    // fingers are enumerated and loaded after that
     enumerate();
-    loadFingers();
     registerDBus();
 }
 
@@ -43,21 +43,21 @@ void FPDCommunity::registerDBus()
         qDebug() << "Registering service on dbus" << SERVICE_NAME;
         if (!connection.registerService(SERVICE_NAME))
         {
-            qDebug() << "Didnt register service";
+            qCritical() << "Didnt register service";
             QCoreApplication::quit();
             return;
         }
 
         if (!connection.registerObject("/org/sailfishos/fingerprint1", this, QDBusConnection::ExportAllInvokables | QDBusConnection::ExportAllSignals | QDBusConnection::ExportAllProperties))
         {
-            qDebug() << "Didnt register object"
+            qCritical() << "Didnt register object"
                         "";
             QCoreApplication::quit();
             return;
         }
         m_dbusRegistered = true;
 
-        qDebug() << "Sucessfully registered to dbus systemBus";
+        qInfo() << "Sucessfully registered to dbus systemBus";
     }
 }
 
@@ -65,16 +65,11 @@ void FPDCommunity::saveFingers()
 {
     qDebug() << Q_FUNC_INFO;
 
-    if (m_fingerMap.count() == 0) {
-        qDebug() << "No fingers to save";
-        return;
-    }
-
     QString filename = FINGERPRINT_PATH FINGERPRINT_FILE;
     QFile fingerprintFile(filename);
 
     if (!fingerprintFile.open(QIODevice::WriteOnly)){
-        qDebug() << "Could not write " << filename;
+        qWarning() << "Could not write " << filename;
         return;
     }
 
@@ -93,11 +88,12 @@ void FPDCommunity::loadFingers()
     in.setVersion(QDataStream::Qt_5_6);
 
     if (!fingerprintFile.open(QIODevice::ReadOnly)) {
-        qDebug() << "Could not read the file:" << filename << "Error string:" << fingerprintFile.errorString();
-        return;
+        qInfo() << "Could not read the file:" << filename << "Error string:" << fingerprintFile.errorString();
+        qInfo() << "Assuming empty fingerprint map";
+        m_fingerMap.clear();
+    } else {
+        in >> m_fingerMap;
     }
-
-    in >> m_fingerMap;
 
     QList<uint32_t> enumeratedFingers = m_androidFP.fingerprints();
 
@@ -105,12 +101,21 @@ void FPDCommunity::loadFingers()
     QList<uint32_t> keys = m_fingerMap.keys();
     for (int i = 0; i < keys.size(); ++i) {
         if (!enumeratedFingers.contains(keys[i])) {
-            qDebug() << "Loaded finger " << keys[i] << m_fingerMap.value(keys[i]) << "not found in store, removing";
+            qWarning() << "Loaded finger " << keys[i] << m_fingerMap.value(keys[i]) << "not found in store, removing";
             m_fingerMap.remove(keys[i]);
         }
     }
 
-    //Save after load incase any were removed.
+    // Check whether all enumerated fingerprints are in the map
+    QList<uint32_t> mapped = m_fingerMap.keys();
+    for (uint32_t k: enumeratedFingers) {
+        if (!mapped.contains(k)) {
+            qWarning() << "Unknown fingerprint found, adding to the list:" << k;
+            m_fingerMap[k] = QStringLiteral("Unknown %1").arg(k);
+        }
+    }
+
+    //Save after load incase any were removed or added
     saveFingers();
 
     qDebug() << "Loaded finger map:" << m_fingerMap;
@@ -119,6 +124,12 @@ void FPDCommunity::loadFingers()
 int FPDCommunity::Enroll(const QString &finger)
 {
     qDebug() << Q_FUNC_INFO << finger;
+
+    // check if we have this ID already
+    if (m_fingerMap.values().contains(finger)) {
+        qWarning() << "Finger" << finger << "is in the database already";
+        return FPREPLY_KEY_ALREADY_EXISTS;
+    }
 
     if (m_state == FPSTATE_IDLE) {
         setState(FPSTATE_ENROLLING);
@@ -163,20 +174,10 @@ QString FPDCommunity::GetState()
     return QtEnumToString(m_state);
 }
 
-//!TODO Not sure what this returns
 QStringList FPDCommunity::GetAll()
 {
     qDebug() << Q_FUNC_INFO;
     return m_fingerMap.values();
-}
-
-void FPDCommunity::enumerate()
-{
-    qDebug() << Q_FUNC_INFO;
-    if (m_state == FPSTATE_IDLE) {
-        setState(FPSTATE_ENUMERATING);
-        m_androidFP.enumerate();
-    }
 }
 
 int FPDCommunity::Abort()
@@ -192,7 +193,7 @@ int FPDCommunity::Abort()
 
 void FPDCommunity::Verify()
 {
-
+    qDebug() << Q_FUNC_INFO;
 }
 
 int FPDCommunity::Remove(const QString &finger)
@@ -203,20 +204,36 @@ int FPDCommunity::Remove(const QString &finger)
         return FPREPLY_ALREADY_BUSY;
     }
 
-    if (!m_fingerMap.values().contains(finger)) {
+    uint32_t key = 0;
+    for (auto i = m_fingerMap.constBegin(); i != m_fingerMap.constEnd(); ++i) {
+        if (i.value() == finger) {
+            key = i.key();
+            break;
+        }
+    }
+
+    if (!key) {
         return FPREPLY_KEY_DOES_NOT_EXIST;
     }
 
     setState(FPSTATE_REMOVING);
-    uint32_t key = m_fingerMap.keys().at(m_fingerMap.values().indexOf(finger));
     m_androidFP.remove(key);
     return FPREPLY_STARTED;
+}
+
+void FPDCommunity::enumerate()
+{
+    qDebug() << Q_FUNC_INFO;
+    if (m_state == FPSTATE_IDLE) {
+        setState(FPSTATE_ENUMERATING);
+        m_androidFP.enumerate();
+    }
 }
 
 void FPDCommunity::slot_enrollProgress(float pc)
 {
     qDebug() << Q_FUNC_INFO << pc;
-    emit EnrollProgressChanged(pc * 100);
+    emit EnrollProgressChanged((int)(pc * 100));
 }
 
 void FPDCommunity::slot_succeeded(uint32_t finger)
@@ -225,9 +242,9 @@ void FPDCommunity::slot_succeeded(uint32_t finger)
     m_fingerMap[finger] = m_addingFinger;
     emit Added(m_addingFinger);
     m_addingFinger = "";
-    enumerate();
     saveFingers();
     setState(FPSTATE_IDLE);
+    enumerate();
 }
 
 void FPDCommunity::slot_failed(const QString &message)
@@ -235,8 +252,8 @@ void FPDCommunity::slot_failed(const QString &message)
     qDebug() << Q_FUNC_INFO << message;
 
     if (!(m_state == FPSTATE_IDENTIFYING && message == "FINGER_NOT_RECOGNIZED")) {
-        enumerate();
         setState(FPSTATE_IDLE);
+        enumerate();
     }
 }
 
@@ -284,8 +301,8 @@ void FPDCommunity::slot_removed(uint32_t finger)
     QString f = m_fingerMap[finger];
     emit Removed(f);
     m_fingerMap.remove(finger);
-    enumerate();
     setState(FPSTATE_IDLE);
+    enumerate();
 }
 
 void FPDCommunity::slot_authenticated(uint32_t finger)
@@ -294,8 +311,8 @@ void FPDCommunity::slot_authenticated(uint32_t finger)
     if (m_fingerMap.contains(finger)){
         emit Identified(m_fingerMap[finger]);
     } else {
-        qDebug() << "Authenticated finger was not found in the map.  Assuming name";
-        emit Identified("finger1");
+        qWarning() << "Authenticated finger was not found in the map.  Assuming name";
+        emit Identified(QStringLiteral("Unknown %1").arg(finger));
     }
     setState(FPSTATE_IDLE);
 }
@@ -310,8 +327,9 @@ void FPDCommunity::slot_cancelIdentify()
 void FPDCommunity::slot_enumerated()
 {
     qDebug() << Q_FUNC_INFO;
-    emit ListChanged();
     setState(FPSTATE_IDLE);
+    loadFingers();
+    emit ListChanged();
 }
 
 void FPDCommunity::setState(FPDCommunity::State newState)
