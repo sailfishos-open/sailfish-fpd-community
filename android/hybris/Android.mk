@@ -32,7 +32,7 @@ LOCAL_CFLAGS += \
 endif
 
 LOCAL_C_INCLUDES := \
-	$(UPAPI_PATH)/include
+	$(UPAPI_PATH)/src
 
 ifeq ($(IS_ANDROID_8),true)
 LOCAL_SRC_FILES += \
