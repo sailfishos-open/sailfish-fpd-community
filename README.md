@@ -10,6 +10,14 @@ an android library, inspired from biometryd from Ubuntu Touch, by Erfan Abdi (ht
 Some of the code from biometryd has been copied into this project.  That code is licensed under the LGPLv3 and 
 retains its header information.
 
+Reverse engineering was performed using:
+ * dbus-monitor --system "interface=org.sailfishos.fingerprint1"
+   * This show the correct ordering of method calls from the various clients
+ * running "strings" on the sailfilsh-fpd binary
+   * This gave a good hint to some of the return variables and states
+ * The soruces for mce, which talks to the daemon and whose code is open and available
+   * This gave solid function definitions and some of the enums used
+  
 ## How to build for a device
 
 ### Android Library
