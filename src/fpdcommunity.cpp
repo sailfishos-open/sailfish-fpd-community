@@ -265,8 +265,8 @@ void FPDCommunity::slot_succeeded(uint32_t finger)
     emit Added(m_addingFinger);
     m_addingFinger = "";
     saveFingers();
+    emit ListChanged();
     setState(FPSTATE_IDLE);
-    enumerate();
 }
 
 void FPDCommunity::slot_failed(const QString &message)
@@ -275,7 +275,6 @@ void FPDCommunity::slot_failed(const QString &message)
 
     if (!(m_state == FPSTATE_IDENTIFYING && message == "FINGER_NOT_RECOGNIZED")) {
         setState(FPSTATE_IDLE);
-        enumerate();
     }
 }
 
@@ -323,8 +322,9 @@ void FPDCommunity::slot_removed(uint32_t finger)
     QString f = m_fingerMap[finger];
     emit Removed(f);
     m_fingerMap.remove(finger);
+    saveFingers();
+    emit ListChanged();
     setState(FPSTATE_IDLE);
-    enumerate();
 }
 
 void FPDCommunity::slot_authenticated(uint32_t finger)
@@ -350,9 +350,9 @@ void FPDCommunity::slot_cancelIdentify()
 void FPDCommunity::slot_enumerated()
 {
     qDebug() << Q_FUNC_INFO;
-    setState(FPSTATE_IDLE);
     loadFingers();
     emit ListChanged();
+    setState(FPSTATE_IDLE);
 }
 
 void FPDCommunity::setState(FPDCommunity::State newState)
