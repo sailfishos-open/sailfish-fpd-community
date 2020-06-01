@@ -101,7 +101,7 @@ public:
     Q_INVOKABLE QString GetState();
     Q_INVOKABLE QStringList GetAll(); //Returns list of templates in store
     Q_INVOKABLE int Abort();
-    Q_INVOKABLE void Verify();
+    Q_INVOKABLE int Verify();
     Q_INVOKABLE int Remove(const QString &finger);
 
     Q_SIGNAL void Added(const QString &finger);

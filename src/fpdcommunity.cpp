@@ -191,9 +191,20 @@ int FPDCommunity::Abort()
     return FPREPLY_STARTED;
 }
 
-void FPDCommunity::Verify()
+int FPDCommunity::Verify()
 {
     qDebug() << Q_FUNC_INFO;
+    if (m_state != FPSTATE_IDLE) {
+        return FPREPLY_ALREADY_BUSY;
+    }
+    if (m_state == FPSTATE_IDLE) {
+        setState(FPSTATE_VERIFYING);
+        m_androidFP.enroll(100000); //nemo userID
+        emit EnrollProgressChanged(0);
+        return FPREPLY_STARTED;
+    }
+
+    return FPREPLY_ALREADY_BUSY;
 }
 
 int FPDCommunity::Remove(const QString &finger)
@@ -234,6 +245,12 @@ void FPDCommunity::slot_enrollProgress(float pc)
 {
     qDebug() << Q_FUNC_INFO << pc;
     emit EnrollProgressChanged((int)(pc * 100));
+
+    if (m_state == FPSTATE_VERIFYING) {
+        //Cancel the operation if veryfying
+        emit Verified();
+        Abort();
+    }
 }
 
 void FPDCommunity::slot_succeeded(uint32_t finger)
