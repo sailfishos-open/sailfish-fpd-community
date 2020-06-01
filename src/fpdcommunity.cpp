@@ -4,7 +4,6 @@
 #include <QDBusError>
 #include <QDBusInterface>
 #include <QCoreApplication>
-#include <QTimer>
 #include <QDir>
 #include <QDataStream>
 #include <QFile>
@@ -22,6 +21,11 @@ FPDCommunity::FPDCommunity()
     connect(&m_androidFP, &AndroidFP::acquired, this, &FPDCommunity::slot_acquired);
     connect(&m_androidFP, &AndroidFP::authenticated, this, &FPDCommunity::slot_authenticated);
     connect(&m_androidFP, &AndroidFP::enumerated, this, &FPDCommunity::slot_enumerated);
+
+    // configure cancel timer
+    m_cancelTimer.setSingleShot(true);
+    m_cancelTimer.setInterval(30000);
+    connect(&m_cancelTimer, &QTimer::timeout, this, &FPDCommunity::slot_cancelIdentify);
 
     //Create folder to store fingerprint names
     if (!(QDir().mkpath(FINGERPRINT_PATH))) {
@@ -153,7 +157,7 @@ int FPDCommunity::Identify()
     }
 
     setState(FPSTATE_IDENTIFYING);
-    QTimer::singleShot(30000, this, &FPDCommunity::slot_cancelIdentify);
+    m_cancelTimer.start();
     m_androidFP.authenticate();
     return FPREPLY_STARTED;
 }
@@ -187,6 +191,7 @@ int FPDCommunity::Abort()
         return FPREPLY_ALREADY_IDLE;
     }
     m_androidFP.cancel();
+    m_cancelTimer.stop();
     setState(FPSTATE_IDLE);
     return FPREPLY_STARTED;
 }
@@ -325,6 +330,7 @@ void FPDCommunity::slot_removed(uint32_t finger)
 void FPDCommunity::slot_authenticated(uint32_t finger)
 {
     qDebug() << Q_FUNC_INFO << finger;
+    m_cancelTimer.stop();
     if (m_fingerMap.contains(finger)){
         emit Identified(m_fingerMap[finger]);
     } else {

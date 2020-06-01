@@ -3,6 +3,8 @@
 
 #include <QObject>
 #include <QMetaEnum>
+#include <QTimer>
+
 #include "androidfp.h"
 
 #define SERVICE_NAME "org.sailfishos.fingerprint1"
@@ -141,6 +143,7 @@ private:
     AcquiredState m_acquired = FPACQUIRED_UNSPECIFIED;
     QString m_addingFinger;
     QMap<uint32_t, QString> m_fingerMap;
+    QTimer m_cancelTimer;
 
     void setState(State newState);
     void registerDBus();
