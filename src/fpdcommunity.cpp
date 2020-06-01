@@ -192,6 +192,7 @@ int FPDCommunity::Abort()
     }
     m_androidFP.cancel();
     m_cancelTimer.stop();
+    emit Aborted();
     setState(FPSTATE_IDLE);
     return FPREPLY_STARTED;
 }
@@ -273,7 +274,12 @@ void FPDCommunity::slot_failed(const QString &message)
 {
     qDebug() << Q_FUNC_INFO << message;
 
-    if (!(m_state == FPSTATE_IDENTIFYING && message == "FINGER_NOT_RECOGNIZED")) {
+    emit ErrorInfo(message); // always report error via signal
+    if (m_state == FPSTATE_IDENTIFYING && message == "FINGER_NOT_RECOGNIZED")
+        return; // giving a chance to try another finger
+
+    if (m_state != FPSTATE_IDLE) {
+        emit Failed();
         setState(FPSTATE_IDLE);
     }
 }
@@ -344,6 +350,7 @@ void FPDCommunity::slot_cancelIdentify()
 {
     qDebug() << Q_FUNC_INFO;
     m_androidFP.cancel();
+    emit Failed();
     setState(FPSTATE_IDLE);
 }
 
