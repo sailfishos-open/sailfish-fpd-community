@@ -15,7 +15,7 @@
  *
  * Authored by: Erfan Abdi <erfangplus@gmail.com>
  */
-#include <biometry/hardware/biometry.h>
+#include <biometry.h>
 
 #include <pthread.h>
 #include <string.h>
