@@ -8,7 +8,7 @@
 #include <QDir>
 #include <QDataStream>
 #include <QFile>
-#define FINGERPRINT_PATH "/var/cache/sailfish-fpd-community/"
+#define FINGERPRINT_PATH "/var/lib/sailfish-fpd-community/"
 #define FINGERPRINT_FILE "fingerprints.db"
 
 FPDCommunity::FPDCommunity()
