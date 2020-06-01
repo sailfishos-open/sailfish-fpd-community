@@ -125,9 +125,16 @@ void FPDCommunity::loadFingers()
     qDebug() << "Loaded finger map:" << m_fingerMap;
 }
 
-int FPDCommunity::Enroll(const QString &finger)
+int FPDCommunity::Enroll(const QString &finger, const QDBusMessage &message)
 {
-    qDebug() << Q_FUNC_INFO << finger;
+    const QString caller = message.service();
+    qDebug() << Q_FUNC_INFO << finger << caller;
+
+    // check if busy by other client
+    if (!m_dbusCaller.isEmpty() && m_dbusCaller != caller) {
+        qWarning() << Q_FUNC_INFO << "called while busy. Caller:" << caller;
+        return FPREPLY_ALREADY_BUSY;
+    }
 
     // check if we have this ID already
     if (m_fingerMap.values().contains(finger)) {
@@ -138,6 +145,7 @@ int FPDCommunity::Enroll(const QString &finger)
     if (m_state == FPSTATE_IDLE) {
         setState(FPSTATE_ENROLLING);
         m_addingFinger = finger;
+        m_dbusCaller = caller;
         m_androidFP.enroll(100000); //nemo userID
         emit EnrollProgressChanged(0);
         return FPREPLY_STARTED;
@@ -145,9 +153,17 @@ int FPDCommunity::Enroll(const QString &finger)
     return FPREPLY_ALREADY_BUSY;
 }
 
-int FPDCommunity::Identify()
+int FPDCommunity::Identify(const QDBusMessage &message)
 {
-    qDebug() << Q_FUNC_INFO;
+    const QString caller = message.service();
+    qDebug() << Q_FUNC_INFO << caller;
+
+    // check if busy by other client
+    if (!m_dbusCaller.isEmpty() && m_dbusCaller != caller) {
+        qWarning() << Q_FUNC_INFO << "called while busy. Caller:" << caller;
+        return FPREPLY_ALREADY_BUSY;
+    }
+
     if (m_state != FPSTATE_IDLE) {
         return FPREPLY_ALREADY_BUSY;
     }
@@ -157,17 +173,26 @@ int FPDCommunity::Identify()
     }
 
     setState(FPSTATE_IDENTIFYING);
+    m_dbusCaller = caller;
     m_cancelTimer.start();
     m_androidFP.authenticate();
     return FPREPLY_STARTED;
 }
 
-void FPDCommunity::Clear()
+void FPDCommunity::Clear(const QDBusMessage &message)
 {
-    qDebug() << Q_FUNC_INFO;
+    const QString caller = message.service();
+    qDebug() << Q_FUNC_INFO << caller;
+
+    // check if busy by other client
+    if (!m_dbusCaller.isEmpty() && m_dbusCaller != caller) {
+        qWarning() << Q_FUNC_INFO << "called while busy. Caller:" << caller;
+        return;
+    }
 
     if (m_state == FPSTATE_IDLE) {
         setState(FPSTATE_REMOVING);
+        m_dbusCaller = caller;
         m_androidFP.clear();
     }
 }
@@ -184,28 +209,44 @@ QStringList FPDCommunity::GetAll()
     return m_fingerMap.values();
 }
 
-int FPDCommunity::Abort()
+int FPDCommunity::Abort(const QDBusMessage &message)
 {
-    qDebug() << Q_FUNC_INFO;
+    const QString caller = message.service();
+    qDebug() << Q_FUNC_INFO << caller;
+
+    // check if the call is initiated by some other client
+    if (!m_dbusCaller.isEmpty() && m_dbusCaller != caller) {
+        qWarning() << Q_FUNC_INFO << "called while busy. Caller:" << caller;
+        return FPREPLY_ALREADY_IDLE;
+    }
+
     if (m_state == FPSTATE_IDLE) {
         return FPREPLY_ALREADY_IDLE;
     }
-    m_androidFP.cancel();
-    m_cancelTimer.stop();
-    emit Aborted();
-    setState(FPSTATE_IDLE);
+
+    abort();
     return FPREPLY_STARTED;
 }
 
-int FPDCommunity::Verify()
+int FPDCommunity::Verify(const QDBusMessage &message)
 {
-    qDebug() << Q_FUNC_INFO;
+    const QString caller = message.service();
+    qDebug() << Q_FUNC_INFO << caller;
+
+    // check if busy by other client
+    if (!m_dbusCaller.isEmpty() && m_dbusCaller != caller) {
+        qWarning() << Q_FUNC_INFO << "called while busy. Caller:" << caller;
+        return FPREPLY_ALREADY_IDLE;
+    }
+
     if (m_state != FPSTATE_IDLE) {
         return FPREPLY_ALREADY_BUSY;
     }
+
     if (m_state == FPSTATE_IDLE) {
         setState(FPSTATE_VERIFYING);
         m_androidFP.enroll(100000); //nemo userID
+        m_dbusCaller = caller;
         emit EnrollProgressChanged(0);
         return FPREPLY_STARTED;
     }
@@ -213,9 +254,16 @@ int FPDCommunity::Verify()
     return FPREPLY_ALREADY_BUSY;
 }
 
-int FPDCommunity::Remove(const QString &finger)
+int FPDCommunity::Remove(const QString &finger, const QDBusMessage &message)
 {
-    qDebug() << Q_FUNC_INFO << finger;
+    const QString caller = message.service();
+    qDebug() << Q_FUNC_INFO << finger << caller;
+
+    // check if busy by other client
+    if (!m_dbusCaller.isEmpty() && m_dbusCaller != caller) {
+        qWarning() << Q_FUNC_INFO << "called while busy. Caller:" << caller;
+        return FPREPLY_ALREADY_BUSY;
+    }
 
     if (m_state != FPSTATE_IDLE) {
         return FPREPLY_ALREADY_BUSY;
@@ -235,7 +283,16 @@ int FPDCommunity::Remove(const QString &finger)
 
     setState(FPSTATE_REMOVING);
     m_androidFP.remove(key);
+    m_dbusCaller = caller;
     return FPREPLY_STARTED;
+}
+
+void FPDCommunity::abort()
+{
+    m_androidFP.cancel();
+    m_cancelTimer.stop();
+    emit Aborted();
+    setState(FPSTATE_IDLE);
 }
 
 void FPDCommunity::enumerate()
@@ -255,7 +312,7 @@ void FPDCommunity::slot_enrollProgress(float pc)
     if (m_state == FPSTATE_VERIFYING) {
         //Cancel the operation if veryfying
         emit Verified();
-        Abort();
+        abort();
     }
 }
 
@@ -365,6 +422,10 @@ void FPDCommunity::slot_enumerated()
 void FPDCommunity::setState(FPDCommunity::State newState)
 {
     qDebug() << Q_FUNC_INFO << newState;
+
+    if (newState == FPSTATE_IDLE)
+        m_dbusCaller.clear();
+
     if (newState != m_state) {
         m_state = newState;
         emit StateChanged(QtEnumToString(m_state));

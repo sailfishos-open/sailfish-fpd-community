@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QMetaEnum>
 #include <QTimer>
+#include <QDBusMessage>
 
 #include "androidfp.h"
 
@@ -98,13 +99,14 @@ public:
     /* ========================================================================= *
      * FINGERPRINT_DAEMON_DBUS_SERVICE (API Version 1)
      * ========================================================================= */
-    Q_INVOKABLE int Enroll(const QString &finger);
-    Q_INVOKABLE int Identify();
+    Q_INVOKABLE int Enroll(const QString &finger, const QDBusMessage &message);
+    Q_INVOKABLE int Identify(const QDBusMessage &message);
     Q_INVOKABLE QString GetState();
     Q_INVOKABLE QStringList GetAll(); //Returns list of templates in store
-    Q_INVOKABLE int Abort();
-    Q_INVOKABLE int Verify();
-    Q_INVOKABLE int Remove(const QString &finger);
+    Q_INVOKABLE int Abort(const QDBusMessage &message);
+    Q_INVOKABLE int Verify(const QDBusMessage &message);
+    Q_INVOKABLE int Remove(const QString &finger, const QDBusMessage &message);
+    Q_INVOKABLE void Clear(const QDBusMessage &message);
 
     Q_SIGNAL void Added(const QString &finger);
     Q_SIGNAL void Removed(const QString &finger);
@@ -121,8 +123,6 @@ public:
 
     /* ========================================================================= */
 
-    Q_INVOKABLE void Clear();
-
 private slots:
     void slot_enrollProgress(float pc);
     void slot_succeeded(uint32_t finger);
@@ -134,11 +134,13 @@ private slots:
     void slot_enumerated();
 
 private:
+    void abort();
     void enumerate();
 
 private:
     AndroidFP m_androidFP;
     bool m_dbusRegistered = false;
+    QString m_dbusCaller;
     State m_state = FPSTATE_IDLE;
     AcquiredState m_acquired = FPACQUIRED_UNSPECIFIED;
     QString m_addingFinger;
