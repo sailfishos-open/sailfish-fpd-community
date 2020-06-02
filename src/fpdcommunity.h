@@ -106,7 +106,6 @@ public:
     Q_INVOKABLE int Abort(const QDBusMessage &message);
     Q_INVOKABLE int Verify(const QDBusMessage &message);
     Q_INVOKABLE int Remove(const QString &finger, const QDBusMessage &message);
-    Q_INVOKABLE void Clear(const QDBusMessage &message);
 
     Q_SIGNAL void Added(const QString &finger);
     Q_SIGNAL void Removed(const QString &finger);
@@ -122,6 +121,9 @@ public:
     Q_SIGNAL void ListChanged();
 
     /* ========================================================================= */
+
+    /* Community DBUS API additions */
+    Q_INVOKABLE void Clear(const QDBusMessage &message);
 
 private slots:
     void slot_enrollProgress(float pc);
