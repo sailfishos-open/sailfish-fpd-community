@@ -158,6 +158,8 @@ void AndroidFP::removeCallback(uint32_t finger, uint32_t remaining)
     qDebug() << Q_FUNC_INFO << finger << remaining;
 
     if ((finger == m_removingFinger || m_removingFinger == 0) && remaining == 0) {
+        if (m_removingFinger == 0)
+            finger = 0;
         emit removed(finger);
         m_removingFinger = 0;
     }
