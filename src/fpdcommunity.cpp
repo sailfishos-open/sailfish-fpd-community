@@ -382,9 +382,16 @@ void FPDCommunity::slot_acquired(int info)
 void FPDCommunity::slot_removed(uint32_t finger)
 {
     qDebug() << Q_FUNC_INFO << finger;
-    QString f = m_fingerMap[finger];
-    emit Removed(f);
-    m_fingerMap.remove(finger);
+    if (finger != 0) {
+        QString f = m_fingerMap[finger];
+        emit Removed(f);
+        m_fingerMap.remove(finger);
+    } else {
+        QStringList values = m_fingerMap.values();
+        for (auto f: values)
+            emit Removed(f);
+        m_fingerMap.clear();
+    }
     saveFingers();
     emit ListChanged();
     setState(FPSTATE_IDLE);
