@@ -7,6 +7,12 @@
 #include <QDir>
 #include <QDataStream>
 #include <QFile>
+
+#include <unistd.h>
+#include <sys/types.h>
+#include <pwd.h>
+#include <grp.h>
+
 #define FINGERPRINT_PATH "/var/lib/sailfish-fpd-community/"
 #define FINGERPRINT_FILE "fingerprints.db"
 
@@ -27,13 +33,8 @@ FPDCommunity::FPDCommunity()
     m_cancelTimer.setInterval(30000);
     connect(&m_cancelTimer, &QTimer::timeout, this, &FPDCommunity::slot_cancelIdentify);
 
-    //Create folder to store fingerprint names
-    if (!(QDir().mkpath(FINGERPRINT_PATH))) {
-        qWarning() << "Unable to create " << FINGERPRINT_PATH;
-    }
-
-    // fingers are enumerated and loaded after that
-    enumerate();
+    // set current user - nemo for now
+    setUser(100000);
     registerDBus();
 }
 
@@ -65,15 +66,105 @@ void FPDCommunity::registerDBus()
     }
 }
 
+// Code from https://stackoverflow.com/a/37489754/11848012
+// with minor modifications
+bool do_chown(const char *file_path, const char *user_name,
+              const char *group_name)
+{
+    uid_t          uid;
+    gid_t          gid;
+    struct passwd *pwd;
+    struct group  *grp;
+
+    pwd = getpwnam(user_name);
+    if (pwd == nullptr) {
+        qWarning() << "Failed to get user id for" << user_name;
+        return false;
+    }
+    uid = pwd->pw_uid;
+
+    grp = getgrnam(group_name);
+    if (grp == nullptr) {
+        qWarning() << "Failed to get group id for" << group_name;
+        return false;
+    }
+    gid = grp->gr_gid;
+
+    if (chown(file_path, uid, gid) == -1) {
+        qWarning() << "Failed to chown for" << file_path;
+        return false;
+    }
+    return true;
+}
+
+static bool makePath(const char* path, const char* user = nullptr, const char* group = nullptr,
+                     QFileDevice::Permissions permissions = QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ExeOwner)
+{
+    qDebug() << Q_FUNC_INFO << path << user << group << permissions;
+
+    QFileInfo fi(path);
+    if (fi.exists()) {
+        return true;
+    }
+
+    QString leaf = fi.fileName();
+    QDir dir = fi.absoluteDir();
+    if (!makePath(dir.path().toLocal8Bit().data(), user, group, permissions)) {
+        return false;
+    }
+
+    if (!dir.mkdir(leaf)) {
+        qWarning() << "Failed to create directory" << path;
+        return false;
+    }
+
+    if (!QFile::setPermissions(path, permissions))  {
+        qWarning() << "Failed to set permissions" << path;
+        return false;
+    }
+
+    if (user != nullptr && group != nullptr) {
+      return do_chown(path, user, group);
+    }
+
+    return true;
+}
+
+void FPDCommunity::setUser(uint32_t uid)
+{
+    qDebug() << Q_FUNC_INFO << uid;
+
+    // path for android store
+    QString andrPath = AndroidFP::getDefaultGroupPath(uid);
+
+    // create path if missing and set expected permissions / ownership
+    if (!makePath(andrPath.toLocal8Bit().data(), "system", "system")) {
+        qWarning() << "Unable to create Android store" << andrPath;
+    }
+
+    // path for storing string<->uint fp id map
+    QDir fpDir(QStringLiteral(FINGERPRINT_PATH "/%1").arg(uid));
+    if (!makePath(fpDir.absolutePath().toLocal8Bit().data())) {
+        qWarning() << "Unable to create FPD store" << fpDir.absolutePath();
+    }
+
+    m_fingerDatabasePath = fpDir.absoluteFilePath(FINGERPRINT_FILE);
+
+    // always setting group id to 0
+    m_androidFP.setGroup(0, andrPath);
+
+    // fingers are enumerated and loaded after that
+    enumerate();
+}
+
 void FPDCommunity::saveFingers()
 {
     qDebug() << Q_FUNC_INFO;
 
-    QString filename = FINGERPRINT_PATH FINGERPRINT_FILE;
-    QFile fingerprintFile(filename);
+    QFile fingerprintFile(m_fingerDatabasePath);
 
-    if (!fingerprintFile.open(QIODevice::WriteOnly)){
-        qWarning() << "Could not write " << filename;
+    if (!fingerprintFile.open(QIODevice::WriteOnly)) {
+        qWarning() << "Could not write " << m_fingerDatabasePath;
         return;
     }
 
@@ -86,13 +177,12 @@ void FPDCommunity::loadFingers()
 {
     qDebug() << Q_FUNC_INFO;
 
-    QString filename = FINGERPRINT_PATH FINGERPRINT_FILE;
-    QFile fingerprintFile(filename);
+    QFile fingerprintFile(m_fingerDatabasePath);
     QDataStream in(&fingerprintFile);
     in.setVersion(QDataStream::Qt_5_6);
 
     if (!fingerprintFile.open(QIODevice::ReadOnly)) {
-        qInfo() << "Could not read the file:" << filename << "Error string:" << fingerprintFile.errorString();
+        qInfo() << "Could not read the file:" << m_fingerDatabasePath << "Error string:" << fingerprintFile.errorString();
         qInfo() << "Assuming empty fingerprint map";
         m_fingerMap.clear();
     } else {
