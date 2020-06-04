@@ -59,10 +59,12 @@ QString AndroidFP::getDefaultGroupPath(uint32_t uid)
 {
     util::AndroidPropertyStore store;
     std::string api_level = store.get("ro.product.first_api_level");
-    if (api_level.empty())
+    if (api_level.empty()) {
       api_level = store.get("ro.build.version.sdk");
-    if (atoi(api_level.c_str()) <= 27)
+    }
+    if (atoi(api_level.c_str()) <= 27) {
       return QStringLiteral("/data/system/users/%1/fpdata").arg(uid);
+    }
     return QStringLiteral("/data/vendor_de/%1/fpdata").arg(uid);
 }
 
@@ -76,9 +78,9 @@ void AndroidFP::setGroup(uint32_t gid, const QString &storePath)
         qWarning() << "Cannot set empty active group path";
         failed(QStringLiteral("Cannot set empty active group path"));
         return;
-    } else {
-        std::strncpy(path, storePath.toLocal8Bit().data(), sizeof(path));
     }
+
+    std::strncpy(path, storePath.toLocal8Bit().data(), sizeof(path));
     path[ sizeof(path)-1 ] = 0;
     ret = u_hardware_biometry_setActiveGroup(m_biometry, gid, path);
 

@@ -103,13 +103,15 @@ static bool makePath(const char* path, const char* user = nullptr, const char* g
     qDebug() << Q_FUNC_INFO << path << user << group << permissions;
 
     QFileInfo fi(path);
-    if (fi.exists())
+    if (fi.exists()) {
         return true;
+    }
 
     QString leaf = fi.fileName();
     QDir dir = fi.absoluteDir();
-    if (!makePath(dir.path().toLocal8Bit().data(), user, group, permissions))
+    if (!makePath(dir.path().toLocal8Bit().data(), user, group, permissions)) {
         return false;
+    }
 
     if (!dir.mkdir(leaf)) {
         qWarning() << "Failed to create directory" << path;
@@ -121,8 +123,10 @@ static bool makePath(const char* path, const char* user = nullptr, const char* g
         return false;
     }
 
-    if (user != nullptr && group != nullptr)
+    if (user != nullptr && group != nullptr) {
       return do_chown(path, user, group);
+    }
+
     return true;
 }
 
@@ -159,7 +163,7 @@ void FPDCommunity::saveFingers()
 
     QFile fingerprintFile(m_fingerDatabasePath);
 
-    if (!fingerprintFile.open(QIODevice::WriteOnly)){
+    if (!fingerprintFile.open(QIODevice::WriteOnly)) {
         qWarning() << "Could not write " << m_fingerDatabasePath;
         return;
     }
