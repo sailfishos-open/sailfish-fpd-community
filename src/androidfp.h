@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QList>
+#include <QString>
 
 #include "biometry.h"
 
@@ -11,6 +12,7 @@ class AndroidFP : public QObject
     Q_OBJECT
 public:
     explicit AndroidFP(QObject *parent = nullptr);
+    void setGroup(uint32_t gid, const QString &storePath);
     void enroll(uid_t user_id);
     void remove(uid_t finger);
     void cancel();
@@ -18,6 +20,8 @@ public:
     void enumerate();
     void clear();
     QList<uint32_t> fingerprints() const;
+
+    static QString getDefaultGroupPath(uint32_t uid);
 
 signals:
     void failed(const QString& message);

@@ -1,6 +1,10 @@
 #include "androidfp.h"
 #include "util/property_store.h"
+
 #include <QDebug>
+
+#include <limits.h>
+#include <cstring>
 
 std::string IntToStringFingerprintError(int error, int vendorCode){
     switch(error) {
@@ -40,18 +44,6 @@ std::string IntToStringRequestStatus(int error){
 
 AndroidFP::AndroidFP(QObject *parent) : QObject(parent), m_biometry(u_hardware_biometry_new())
 {
-    util::AndroidPropertyStore store;
-    UHardwareBiometryRequestStatus ret = SYS_OK;
-    std::string api_level = store.get("ro.product.first_api_level");
-    if (api_level.empty())
-        api_level = store.get("ro.build.version.sdk");
-    if (atoi(api_level.c_str()) <= 27)
-        ret = u_hardware_biometry_setActiveGroup(m_biometry, 0, (char*)"/data/system/users/0/fpdata/");
-    else
-        ret = u_hardware_biometry_setActiveGroup(m_biometry, 0, (char*)"/data/vendor_de/0/fpdata/");
-    if (ret != SYS_OK)
-        printf("setActiveGroup failed: %s\n", IntToStringRequestStatus(ret).c_str());
-
     //Set up the callbacks
     fp_params.enrollresult_cb = enrollresult_cb;
     fp_params.acquired_cb = acquired_cb;
@@ -61,6 +53,41 @@ AndroidFP::AndroidFP(QObject *parent) : QObject(parent), m_biometry(u_hardware_b
     fp_params.enumerate_cb = enumerate_cb;
     fp_params.context = this;
     u_hardware_biometry_setNotify(m_biometry, &fp_params);
+}
+
+QString AndroidFP::getDefaultGroupPath(uint32_t uid)
+{
+    util::AndroidPropertyStore store;
+    std::string api_level = store.get("ro.product.first_api_level");
+    if (api_level.empty())
+      api_level = store.get("ro.build.version.sdk");
+    if (atoi(api_level.c_str()) <= 27)
+      return QStringLiteral("/data/system/users/%1/fpdata").arg(uid);
+    return QStringLiteral("/data/vendor_de/%1/fpdata").arg(uid);
+}
+
+void AndroidFP::setGroup(uint32_t gid, const QString &storePath)
+{
+    qDebug() << Q_FUNC_INFO << gid << storePath;
+    UHardwareBiometryRequestStatus ret = SYS_OK;
+    char path[PATH_MAX];
+
+    if (storePath.isEmpty()) {
+        qWarning() << "Cannot set empty active group path";
+        failed(QStringLiteral("Cannot set empty active group path"));
+        return;
+    } else {
+        std::strncpy(path, storePath.toLocal8Bit().data(), sizeof(path));
+    }
+    path[ sizeof(path)-1 ] = 0;
+    ret = u_hardware_biometry_setActiveGroup(m_biometry, gid, path);
+
+    if (ret != SYS_OK) {
+        qWarning() << "setActiveGroup failed: " << IntToStringRequestStatus(ret).c_str();
+        failed(QStringLiteral("setActiveGroup failed: %1").arg(IntToStringRequestStatus(ret).c_str()));
+    } else {
+        qInfo() << "setActiveGroup to" << path;
+    }
 }
 
 void AndroidFP::enroll(uid_t user_id)

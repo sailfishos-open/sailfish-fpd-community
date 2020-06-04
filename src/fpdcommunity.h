@@ -138,16 +138,21 @@ private slots:
 private:
     void abort();
     void enumerate();
+    void setUser(uint32_t uid);
 
 private:
     AndroidFP m_androidFP;
+    QTimer m_cancelTimer;
+
     bool m_dbusRegistered = false;
     QString m_dbusCaller;
+
+    QString m_fingerDatabasePath;
+    QMap<uint32_t, QString> m_fingerMap;
+
     State m_state = FPSTATE_IDLE;
     AcquiredState m_acquired = FPACQUIRED_UNSPECIFIED;
     QString m_addingFinger;
-    QMap<uint32_t, QString> m_fingerMap;
-    QTimer m_cancelTimer;
 
     void setState(State newState);
     void registerDBus();
