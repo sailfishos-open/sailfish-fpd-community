@@ -1,14 +1,14 @@
 Name:       sailfish-fpd-community
 
 Summary:    FPD Community
-Version:    0.1
+Version:    1.0
 Release:    1
 Group:      Qt/Qt
 License:    LICENSE
 URL:        http://example.org/
 Source0:    %{name}-%{version}.tar.bz2
 Requires:   sailfishsilica-qt5 >= 0.10.9
-Requires:   droid-biometry-fp >= 0.0.1
+Requires:   droid-biometry-fp >= 1.0.0
 BuildRequires:  pkgconfig(sailfishapp) >= 1.0.2
 BuildRequires:  pkgconfig(Qt5Core)
 BuildRequires:  pkgconfig(Qt5Qml)
