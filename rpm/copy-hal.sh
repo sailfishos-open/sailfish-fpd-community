@@ -12,6 +12,6 @@ fi
 fold=$(dirname "$0")/../out
 rm -rf $fold
 mkdir $fold
-cp ./out/target/product/${OUT_DEVICE}/system/lib/libbiometry_fp_api.so $fold
+mv ./out/target/product/${OUT_DEVICE}/system/lib/libbiometry_fp_api.so $fold
 ls -lh $fold
 
