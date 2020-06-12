@@ -20,7 +20,7 @@ Reverse engineering was performed using:
   
 ## How to build for a device
 
-### Android Library
+### Android Library/Binary
 
 In HADK:
 
@@ -29,11 +29,24 @@ In HADK:
     export USE_CCACHE=1
     lunch aosp_$DEVICE-user (or appropriate name)
     make libbiometry_fp_api_32
+    
+If the device uses keymaster 4, then an additional service called fake_crypt is required
+
+    git clone https://github.com/erfanoabdi/fake_crypt.git external/fake_crypt
+    make fake_crypt
+    
+Copy the android parts for packaging
+
     hybris/mw/sailfish-fpd-community/rpm/copy-hal.sh
 
 In SDK:
 
     rpm/dhd/helpers/build_packages.sh --build=hybris/mw/sailfish-fpd-community --spec=rpm/droid-biometry-fp.spec --do-not-install
+    
+If fake_crypt is required
+
+    rpm/dhd/helpers/build_packages.sh --build=hybris/mw/sailfish-fpd-community --spec=rpm/droid-fake-crypt.spec --do-not-install
+
 
 ### Daemon
 

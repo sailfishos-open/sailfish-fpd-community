@@ -22,7 +22,6 @@ pwd
 ls -lh
 
 %install
-
 mkdir -p $RPM_BUILD_ROOT/usr/libexec/droid-hybris/system/lib
 cp out/libbiometry_fp_api.so $RPM_BUILD_ROOT/usr/libexec/droid-hybris/system/lib
 
