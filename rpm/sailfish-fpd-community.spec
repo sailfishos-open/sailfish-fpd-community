@@ -1,7 +1,7 @@
 Name:       sailfish-fpd-community
 
 Summary:    FPD Community
-Version:    1.0
+Version:    1.1.0
 Release:    1
 Group:      Qt/Qt
 License:    LICENSE

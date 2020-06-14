@@ -8,7 +8,7 @@
 
 Name:     droid-fake-crypt
 Summary:  Android Fake Crypt binary
-Version:  1.0.0
+Version:  1.1.0
 Release:  %(date +'%%Y%%m%%d%%H%%M')
 Group:    Kernel/Linux Kernel
 License:  GPLv3
