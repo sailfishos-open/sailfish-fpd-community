@@ -19,6 +19,7 @@ mv ./out/target/product/${OUT_DEVICE}/system/lib/libbiometry_fp_api.so $fold
 if [ -f ./out/target/product/${OUT_DEVICE}/system/bin/fake_crypt ]; then
 mv ./out/target/product/${OUT_DEVICE}/system/bin/fake_crypt $fold
 mv ./out/target/product/${OUT_DEVICE}/system/etc/init/fake_crypt.rc $fold
+sed -i 's+/system/bin/fake_crypt+/usr/libexec/droid-hybris/system/bin/fake_crypt+g' $fold/fake_crypt.rc
 fi
 
 ls -lh $fold
