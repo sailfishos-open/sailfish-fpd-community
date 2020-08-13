@@ -8,9 +8,8 @@
 
 Name:     droid-biometry-fp
 Summary:  Android Biometry FingerPrint library
-Version:  1.1.0
+Version:  1.1.1
 Release:  %(date +'%%Y%%m%%d%%H%%M')
-Group:    Kernel/Linux Kernel
 License:  GPLv3
 Source0:  out/libbiometry_fp_api.so
 
