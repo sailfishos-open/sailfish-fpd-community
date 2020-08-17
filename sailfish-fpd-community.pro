@@ -43,7 +43,7 @@ HEADERS += \
     src/util/property_store.h
 
 target.path = /usr/bin/
-systemd_services.path = $$[QT_INSTALL_LIBS]/systemd/system/
+systemd_services.path = /lib/systemd/system/
 systemd_services.files = sailfish-fpd-community.service
 
 dbus.files = org.sailfishos.fingerprint1.conf
