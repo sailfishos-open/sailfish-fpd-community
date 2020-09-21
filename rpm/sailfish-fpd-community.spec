@@ -8,8 +8,6 @@ URL:        http://example.org/
 Source0:    %{name}-%{version}.tar.bz2
 Requires:   droid-biometry-fp >= 1.0.0
 BuildRequires:  pkgconfig(Qt5Core)
-BuildRequires:  pkgconfig(Qt5Qml)
-BuildRequires:  pkgconfig(Qt5Quick)
 BuildRequires:  pkgconfig(Qt5DBus)
 BuildRequires:  desktop-file-utils
 BuildRequires:  libhybris-devel
