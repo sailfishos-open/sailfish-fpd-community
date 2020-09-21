@@ -12,9 +12,8 @@
 # The name of your application
 TARGET = sailfish-fpd-community
 
+QT -= gui
 QT += dbus
-
-CONFIG += sailfishapp
 
 LIBS += -lhybris-common
 
@@ -33,7 +32,7 @@ DISTFILES += \
 
 # to disable building translations every time, comment out the
 # following CONFIG line
-CONFIG += sailfishapp_i18n
+# CONFIG += sailfishapp_i18n
 
 HEADERS += \
     src/androidfp.h \
