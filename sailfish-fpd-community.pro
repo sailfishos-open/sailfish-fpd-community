@@ -42,13 +42,10 @@ HEADERS += \
     src/util/property_store.h
 
 target.path = /usr/bin/
-systemd_services.path = /lib/systemd/system/
-systemd_services.files = sailfish-fpd-community.service
 
 dbus.files = org.sailfishos.fingerprint1.conf
 dbus.path = /etc/dbus-1/system.d/
 
 INSTALLS += target \
-            systemd_services \
             dbus
 
