@@ -30,6 +30,7 @@ rm -rf %{buildroot}
 %qmake5_install
 
 mkdir -p %{buildroot}/%{_unitdir}/multi-user.target.wants
+cp sailfish-fpd-community.service %{buildroot}/%{_unitdir}/
 ln -s ../sailfish-fpd-community.service %{buildroot}/%{_unitdir}/multi-user.target.wants/sailfish-fpd-community.service
 
 %files
