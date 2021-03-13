@@ -3,16 +3,13 @@
 %define __find_requires     %{nil}
 %global debug_package       %{nil}
 %define __provides_exclude_from ^.*$
-%define device_rpm_architecture_string armv7hl
-%define _target_cpu %{device_rpm_architecture_string}
 
 Name:     droid-fake-crypt
 Summary:  Android Fake Crypt binary
 Version:  1.1.1
 Release:  %(date +'%%Y%%m%%d%%H%%M')
 License:  GPLv3
-Source0:  out/fake_crypt
-Source1:  out/fake_crypt.rc
+Source0:  droid-biometry-fp-0.0.0.tgz
 
 %description
 %{summary}
@@ -20,14 +17,19 @@ Source1:  out/fake_crypt.rc
 %build
 pwd
 ls -lh
+tar -xvf droid-biometry-fp-0.0.0.tgz
 
 %install
-mkdir -p $RPM_BUILD_ROOT/usr/libexec/droid-hybris/system/etc/init
-mkdir -p $RPM_BUILD_ROOT/usr/libexec/droid-hybris/system/bin
-cp out/fake_crypt $RPM_BUILD_ROOT/usr/libexec/droid-hybris/system/bin/
-cp out/fake_crypt.rc $RPM_BUILD_ROOT/usr/libexec/droid-hybris/system/etc/init/
+pushd droid-biometry-fp-0.0.0
+
+mkdir -p %{buildroot}%{_libexecdir}/droid-hybris/system/etc/init
+mkdir -p %{buildroot}%{_libexecdir}/droid-hybris/system/bin
+cp out/target/product/*/system/bin/fake_crypt %{buildroot}%{_libexecdir}/droid-hybris/system/bin/
+cp out/target/product/*/system/etc/init/fake_crypt.rc %{buildroot}%{_libexecdir}/droid-hybris/system/etc/init/
+
+popd
 
 %files
 %defattr(-,root,root,-)
-/usr/libexec/droid-hybris/system/etc/init/fake_crypt.rc
-/usr/libexec/droid-hybris/system/bin/fake_crypt
+%{_libexecdir}/droid-hybris/system/etc/init/fake_crypt.rc
+%{_libexecdir}/droid-hybris/system/bin/fake_crypt
