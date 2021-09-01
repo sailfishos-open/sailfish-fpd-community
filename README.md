@@ -24,11 +24,11 @@ Reverse engineering was performed using:
 
 In HADK:
 
-    git clone https://github.com/piggz/sailfish-fpd-community.git hybris/mw/sailfish-fpd-community
+    git clone https://github.com/sailfishos-open/sailfish-fpd-community.git hybris/mw/sailfish-fpd-community
     source build/envsetup.sh
     export USE_CCACHE=1
     lunch aosp_$DEVICE-user (or appropriate name)
-    make libbiometry_fp_api_32
+    make libbiometry_fp_api (or libbiometry_fp_api_32 for 32bit ports)
     
 If the device uses keymaster 4, then an additional service called fake_crypt is required
 
@@ -59,4 +59,4 @@ in SDK:
 While the daemon is known to work on several devices, it may sometimes be possible to test the daemon without
 using the sailfish settings page.  For this, a seperate GUI application has been developed to exercise
 the DBUS API.  This application can be built from the following sources:
-https://github.com/piggz/sailfish-fpd-community-test
+https://github.com/sailfishos-open/sailfish-fpd-community-test
