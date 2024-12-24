@@ -20,6 +20,8 @@ LOCAL_CFLAGS += \
 	-DANDROID_VERSION_MINOR=$(ANDROID_VERSION_MINOR) \
 	-DANDROID_VERSION_PATCH=$(ANDROID_VERSION_PATCH)
 
+LOCAL_CFLAGS += -DLOG_NDEBUG=0
+
 UPAPI_PATH := $(LOCAL_PATH)/../../
 
 ifneq ($(IS_ANDROID_8),true)
@@ -60,6 +62,7 @@ LOCAL_SHARED_LIBRARIES += \
     libhidltransport \
     libsensor \
     android.hardware.biometrics.fingerprint@2.1 \
+    vendor.lineage.biometrics.fingerprint.inscreen@1.0 \
     android.hardware.gatekeeper@1.0
 endif
 

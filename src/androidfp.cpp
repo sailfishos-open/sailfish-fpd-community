@@ -207,9 +207,9 @@ void AndroidFP::enrollresult_cb(uint64_t, uint32_t fingerId, uint32_t, uint32_t 
     static_cast<AndroidFP*>(context)->enrollCallback(fingerId, remaining);
 }
 
-void AndroidFP::acquired_cb(uint64_t, UHardwareBiometryFingerprintAcquiredInfo info, int32_t, void *context)
+void AndroidFP::acquired_cb(uint64_t, UHardwareBiometryFingerprintAcquiredInfo info, int32_t vendorCode, void *context)
 {
-    qDebug() << Q_FUNC_INFO << info;
+    qDebug() << Q_FUNC_INFO << info << "vendorCode" << vendorCode;
     static_cast<AndroidFP*>(context)->acquiredCallback(info);
 }
 
