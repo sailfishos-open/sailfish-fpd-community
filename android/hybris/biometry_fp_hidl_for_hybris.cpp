@@ -269,6 +269,7 @@ UHardwareBiometryRequestStatus UHardwareBiometry_::enroll(uint32_t gid, uint32_t
         ALOGE("Unable to get FP service\n");
         return SYS_UNKNOWN;
     }
+
     uint8_t *auth_token;
     uint32_t auth_token_len;
     int ret = 0;
@@ -293,14 +294,15 @@ UHardwareBiometryRequestStatus UHardwareBiometry_::enroll(uint32_t gid, uint32_t
                       (const GatekeeperResponse &rsp) {
                           ret = static_cast<int>(rsp.code); // propagate errors
                           if (rsp.code >= GatekeeperStatusCode::STATUS_OK) {
-                              curPwdHandle.setToExternal(const_cast<uint8_t *>((const uint8_t *)rsp.data.data()), rsp.data.size());
+                              curPwdHandle.resize(rsp.data.size());
+                              std::copy(rsp.data.begin(), rsp.data.end(), curPwdHandle.data());
                               ret = 0; // all success states are reported as 0
                           } else if (rsp.code == GatekeeperStatusCode::ERROR_RETRY_TIMEOUT && rsp.timeout > 0) {
                               ret = rsp.timeout;
                           }
                       }
                       );
-    if (!hwRet.isOk()) {
+    if (!hwRet.isOk() || ret) {
         ALOGE("Unable to Enroll on Gatekeeper\n");
         return SYS_UNKNOWN;
     }
@@ -323,8 +325,13 @@ UHardwareBiometryRequestStatus UHardwareBiometry_::enroll(uint32_t gid, uint32_t
                           }
                       }
                       );
-    if (!hwRet.isOk()) {
+    if (!hwRet.isOk() || ret) {
         ALOGE("Unable to Verify on Gatekeeper\n");
+        return SYS_UNKNOWN;
+    }
+
+    if (!auth_token || auth_token_len == 0) {
+        ALOGE("DBG: Invalid auth_token or length is 0 — aborting enroll");
         return SYS_UNKNOWN;
     }
 
